@@ -3,6 +3,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8154"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
     </dependencies>
     <scenes>
         <!--Loading View Controller-->
@@ -49,16 +50,25 @@
                         <viewControllerLayoutGuide type="top" id="HQ2-EA-tez"/>
                         <viewControllerLayoutGuide type="bottom" id="9rT-Rp-QhC"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="bO3-ua-S6W">
+                    <view key="view" clipsSubviews="YES" contentMode="scaleToFill" id="bO3-ua-S6W">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="yvR-hX-uaN">
-                                <rect key="frame" x="74" y="261" width="380" height="217"/>
+                            <view contentMode="scaleToFill" placeholderIntrinsicWidth="360" placeholderIntrinsicHeight="204" translatesAutoresizingMaskIntoConstraints="NO" id="yvR-hX-uaN">
+                                <rect key="frame" x="240" y="396" width="360" height="204"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="204" id="60f-Lz-SjK"/>
+                                    <constraint firstAttribute="width" constant="360" id="UNa-io-Zo9"/>
+                                    <constraint firstAttribute="width" secondItem="yvR-hX-uaN" secondAttribute="height" multiplier="30:17" id="vOf-rL-DxE"/>
+                                </constraints>
                             </view>
                         </subviews>
                         <color key="backgroundColor" red="0.0" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                        <constraints>
+                            <constraint firstAttribute="right" secondItem="yvR-hX-uaN" secondAttribute="right" id="fR6-XE-oO0"/>
+                            <constraint firstItem="yvR-hX-uaN" firstAttribute="bottom" secondItem="bO3-ua-S6W" secondAttribute="bottom" id="kxZ-Bg-yE8"/>
+                        </constraints>
                     </view>
                     <connections>
                         <outlet property="wheelContainer" destination="yvR-hX-uaN" id="Voc-l8-Fxy"/>
