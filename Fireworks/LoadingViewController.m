@@ -1,22 +1,25 @@
 //
-//  ViewController.m
+//  LoadingViewController.m
 //  Fireworks
 //
 //  Created by Mo DeJong on 10/3/15.
 //  Copyright © 2015 helpurock. All rights reserved.
 //
 
-#import "ViewController.h"
+#import "LoadingViewController.h"
 
-@interface ViewController ()
+@interface LoadingViewController ()
 
 @end
 
-@implementation ViewController
+@implementation LoadingViewController
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  // Do any additional setup after loading the view, typically from a nib.
+  
+  NSAssert(self.button, @"button");
+  
+  return;
 }
 
 @end

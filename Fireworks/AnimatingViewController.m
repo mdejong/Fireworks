@@ -6,4 +6,17 @@
 //  Copyright © 2015 helpurock. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import "AnimatingViewController.h"
+
+@interface AnimatingViewController ()
+
+@end
+
+@implementation AnimatingViewController
+
+- (void)viewDidLoad {
+  [super viewDidLoad];
+  return;
+}
+
+@end

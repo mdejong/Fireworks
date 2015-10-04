@@ -5,10 +5,10 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8154"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
+        <!--Loading View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="LoadingViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
@@ -17,24 +17,47 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Loading" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6yg-va-vgg">
-                                <rect key="frame" x="256" y="289" width="88" height="21"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
-                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                <nil key="highlightedColor"/>
-                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bCh-4n-IiJ">
+                                <rect key="frame" x="246" y="285" width="109" height="30"/>
+                                <state key="normal" title="Loading">
+                                    <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
+                                <connections>
+                                    <segue destination="U2L-Ge-9DK" kind="show" id="9bA-jM-XTO"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
-                            <constraint firstItem="6yg-va-vgg" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="IDc-5o-WAc"/>
-                            <constraint firstItem="6yg-va-vgg" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="Kme-EI-0w9"/>
-                            <constraint firstItem="6yg-va-vgg" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="nZI-ik-qc9"/>
+                            <constraint firstItem="bCh-4n-IiJ" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="Vy3-bC-WzG"/>
+                            <constraint firstItem="bCh-4n-IiJ" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="wHU-pK-DJX"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="button" destination="bCh-4n-IiJ" id="iOj-qb-jie"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="459" y="343"/>
+        </scene>
+        <!--Animating View Controller-->
+        <scene sceneID="TAU-r1-FD6">
+            <objects>
+                <viewController id="U2L-Ge-9DK" customClass="AnimatingViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="HQ2-EA-tez"/>
+                        <viewControllerLayoutGuide type="bottom" id="9rT-Rp-QhC"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="bO3-ua-S6W">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" red="0.0" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Gfi-0i-cjX" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1136" y="343"/>
         </scene>
     </scenes>
 </document>
