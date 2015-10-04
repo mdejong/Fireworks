@@ -24,6 +24,8 @@
 
 @property (nonatomic, retain) AVAsset2MvidResourceLoader *wheelLoader;
 
+@property (nonatomic, retain) AVAsset2MvidResourceLoader *redLoader;
+
 @end
 
 @implementation LoadingViewController
@@ -51,28 +53,42 @@
 
 - (void) setupLoaders
 {
-  AVAsset2MvidResourceLoader *wheelLoader = [AVAsset2MvidResourceLoader aVAsset2MvidResourceLoader];
-  self.wheelLoader = wheelLoader;
+  NSString *resFilename;
+  NSString *outFilename;
+
+  resFilename = @"Wheel.m4v";
+  outFilename = @"Wheel.mvid";
+  
+  self.wheelLoader = [self loaderFor24BPPH264:resFilename outFilename:outFilename];
+  
+  resFilename = @"Red.m4v";
+  outFilename = @"Red.mvid";
+  
+  self.redLoader = [self loaderFor24BPPH264:resFilename outFilename:outFilename];
+}
+
+- (AVAsset2MvidResourceLoader*) loaderFor24BPPH264:(NSString*)resFilename
+                                       outFilename:(NSString*)outFilename
+{
+  AVAsset2MvidResourceLoader *loader = [AVAsset2MvidResourceLoader aVAsset2MvidResourceLoader];
+  
+  loader.movieFilename = resFilename;
+  
+  // Generate fully qualified path in tmp dir
+  
+  NSString *outPath = [AVFileUtil getTmpDirPath:outFilename];
+  loader.outPath = outPath;
+  
+  return loader;
 }
 
 - (void) startLoadingTimerCallback
 {
   // Kick off async loading that will read .h264 and write .mvid to disk in tmp dir
 
-  AVAsset2MvidResourceLoader *wheelLoader = self.wheelLoader;
-  
-  NSString *resFilename = @"Wheel.m4v";
-  NSString *outFilename = @"Wheel.mvid";
-  
-  wheelLoader.movieFilename = resFilename;
-  
-  NSString *outPath = [AVFileUtil getTmpDirPath:outFilename];
-  wheelLoader.outPath = outPath;
-
-  // Start async loading, this will kick off mvid conversion without
-  // blocking the main thread since decoding is done in the background
-  
-  [wheelLoader load];
+  for (AVResourceLoader *loader in @[self.wheelLoader, self.redLoader]) {
+    [loader load];
+  }
 }
 
 // Invoked once a second until all resources has been loaded in the background
@@ -83,7 +99,7 @@
   
   BOOL allReady = TRUE;
   
-  for (AVResourceLoader *loader in @[self.wheelLoader]) {
+  for (AVResourceLoader *loader in @[self.wheelLoader, self.redLoader]) {
     if (loader.isReady == FALSE) {
       allReady = FALSE;
     }
