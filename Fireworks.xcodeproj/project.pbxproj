@@ -182,6 +182,9 @@
 		3C4CFA1E1BC0DC6F00B8BEB3 /* AnimatingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C4CFA1D1BC0DC6F00B8BEB3 /* AnimatingViewController.m */; settings = {ASSET_TAGS = (); }; };
 		3C4CFA1F1BC0DC6F00B8BEB3 /* AnimatingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C4CFA1D1BC0DC6F00B8BEB3 /* AnimatingViewController.m */; settings = {ASSET_TAGS = (); }; };
 		3C4CFA201BC0DC6F00B8BEB3 /* AnimatingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C4CFA1D1BC0DC6F00B8BEB3 /* AnimatingViewController.m */; settings = {ASSET_TAGS = (); }; };
+		3C4CFA241BC0E25A00B8BEB3 /* AutoTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C4CFA231BC0E25A00B8BEB3 /* AutoTimer.m */; settings = {ASSET_TAGS = (); }; };
+		3C4CFA251BC0E25A00B8BEB3 /* AutoTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C4CFA231BC0E25A00B8BEB3 /* AutoTimer.m */; settings = {ASSET_TAGS = (); }; };
+		3C4CFA261BC0E25A00B8BEB3 /* AutoTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C4CFA231BC0E25A00B8BEB3 /* AutoTimer.m */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -332,6 +335,8 @@
 		3C4CFA161BC0DBAE00B8BEB3 /* Wheel.m4v */ = {isa = PBXFileReference; lastKnownFileType = file; path = Wheel.m4v; sourceTree = "<group>"; };
 		3C4CFA1D1BC0DC6F00B8BEB3 /* AnimatingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AnimatingViewController.m; sourceTree = "<group>"; };
 		3C4CFA211BC0DCAB00B8BEB3 /* AnimatingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnimatingViewController.h; sourceTree = "<group>"; };
+		3C4CFA221BC0E25A00B8BEB3 /* AutoTimer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AutoTimer.h; sourceTree = "<group>"; };
+		3C4CFA231BC0E25A00B8BEB3 /* AutoTimer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AutoTimer.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -432,6 +437,8 @@
 		3C4CF9061BC0D77F00B8BEB3 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				3C4CFA221BC0E25A00B8BEB3 /* AutoTimer.h */,
+				3C4CFA231BC0E25A00B8BEB3 /* AutoTimer.m */,
 				3C4CF9071BC0D77F00B8BEB3 /* AutoPropertyRelease.h */,
 				3C4CF9081BC0D77F00B8BEB3 /* AutoPropertyRelease.m */,
 				3C4CF9091BC0D77F00B8BEB3 /* AVAnimator */,
@@ -724,6 +731,7 @@
 				3C4CF9951BC0D77F00B8BEB3 /* AVAsset2MvidResourceLoader.m in Sources */,
 				3C4CF9FE1BC0D77F00B8BEB3 /* LZMAExtractor.m in Sources */,
 				3C4CF9BC1BC0D77F00B8BEB3 /* AVResourceLoader.m in Sources */,
+				3C4CFA241BC0E25A00B8BEB3 /* AutoTimer.m in Sources */,
 				3C4CF9891BC0D77F00B8BEB3 /* AVAnimatorOpenGLView.m in Sources */,
 				3C4CF9D71BC0D77F00B8BEB3 /* MutableAttrString.m in Sources */,
 				3C4CF97A1BC0D77F00B8BEB3 /* ApngConvertMaxvid.m in Sources */,
@@ -825,6 +833,7 @@
 				3C4CF98D1BC0D77F00B8BEB3 /* AVAnimatorView.m in Sources */,
 				3C4CF9FF1BC0D77F00B8BEB3 /* LZMAExtractor.m in Sources */,
 				3C4CF9BD1BC0D77F00B8BEB3 /* AVResourceLoader.m in Sources */,
+				3C4CFA251BC0E25A00B8BEB3 /* AutoTimer.m in Sources */,
 				3C4CF9F31BC0D77F00B8BEB3 /* CpuArch.c in Sources */,
 				3C4CFA111BC0D77F00B8BEB3 /* 7zMain.c in Sources */,
 				3C4CF9C91BC0D77F00B8BEB3 /* maxvid_decode_arm.s in Sources */,
@@ -886,6 +895,7 @@
 				3C4CF98E1BC0D77F00B8BEB3 /* AVAnimatorView.m in Sources */,
 				3C4CFA001BC0D77F00B8BEB3 /* LZMAExtractor.m in Sources */,
 				3C4CF9BE1BC0D77F00B8BEB3 /* AVResourceLoader.m in Sources */,
+				3C4CFA261BC0E25A00B8BEB3 /* AutoTimer.m in Sources */,
 				3C4CF9F41BC0D77F00B8BEB3 /* CpuArch.c in Sources */,
 				3C4CFA121BC0D77F00B8BEB3 /* 7zMain.c in Sources */,
 				3C4CF9CA1BC0D77F00B8BEB3 /* maxvid_decode_arm.s in Sources */,
