@@ -10,6 +10,8 @@
 
 #import "AppDelegate.h"
 
+#import "AutoTimer.h"
+
 #import "MediaManager.h"
 
 #import "AVAnimatorView.h"
@@ -18,6 +20,10 @@
 #import "AVMvidFrameDecoder.h"
 
 @interface AnimatingViewController ()
+
+@property (nonatomic, retain) IBOutlet UILabel *fireworksLabel;
+
+@property (nonatomic, retain) AutoTimer *fireworksLabelTimer;
 
 @property (nonatomic, retain) IBOutlet UIView *wheelContainer;
 
@@ -31,6 +37,9 @@
   [super viewDidLoad];
  
   NSAssert(self.wheelContainer, @"wheelContainer");
+  NSAssert(self.fireworksLabel, @"fireworksLabel");
+  
+  self.fireworksLabel.hidden = TRUE;
   
   AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
   MediaManager *mediaManager = appDelegate.mediaManager;
@@ -78,6 +87,31 @@
   wheelMedia.animatorRepeatCount = 0xFFFF;
   
   [wheelMedia startAnimator];
+  
+  // Kick off fireworks label animation times
+  
+  self.fireworksLabelTimer = [AutoTimer autoTimerWithTimeInterval:0.5
+                                                            target:self
+                                                          selector:@selector(startAnimatingFireworkLabel)
+                                                          userInfo:nil
+                                                           repeats:FALSE];
+}
+
+- (void) startAnimatingFireworkLabel
+{
+  self.fireworksLabel.hidden = FALSE;
+  
+  self.fireworksLabelTimer = [AutoTimer autoTimerWithTimeInterval:1.5
+                                                           target:self
+                                                         selector:@selector(stopAnimatingFireworkLabel)
+                                                         userInfo:nil
+                                                          repeats:FALSE];
+}
+
+- (void) stopAnimatingFireworkLabel
+{
+  self.fireworksLabel.hidden = TRUE;
+  self.fireworksLabelTimer = nil;
 }
 
 @end

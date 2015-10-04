@@ -63,14 +63,23 @@
                                     <constraint firstAttribute="width" secondItem="yvR-hX-uaN" secondAttribute="height" multiplier="30:17" id="vOf-rL-DxE"/>
                                 </constraints>
                             </view>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Fireworks!" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CBv-jp-wvH">
+                                <rect key="frame" x="206" y="275" width="189" height="51"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="42"/>
+                                <color key="textColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" red="0.0" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
+                            <constraint firstItem="CBv-jp-wvH" firstAttribute="centerX" secondItem="bO3-ua-S6W" secondAttribute="centerX" id="AnE-LO-jDl"/>
                             <constraint firstAttribute="right" secondItem="yvR-hX-uaN" secondAttribute="right" id="fR6-XE-oO0"/>
+                            <constraint firstItem="CBv-jp-wvH" firstAttribute="centerY" secondItem="bO3-ua-S6W" secondAttribute="centerY" id="h48-fS-Dr1"/>
                             <constraint firstItem="yvR-hX-uaN" firstAttribute="bottom" secondItem="bO3-ua-S6W" secondAttribute="bottom" id="kxZ-Bg-yE8"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="fireworksLabel" destination="CBv-jp-wvH" id="vUF-5m-1mt"/>
                         <outlet property="wheelContainer" destination="yvR-hX-uaN" id="Voc-l8-Fxy"/>
                     </connections>
                 </viewController>
