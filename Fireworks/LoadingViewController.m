@@ -18,6 +18,8 @@
 
 @interface LoadingViewController ()
 
+@property (nonatomic, retain) IBOutlet UIButton *button;
+
 @property (nonatomic, retain) AutoTimer *startLoadingTimer;
 
 @property (nonatomic, retain) AutoTimer *checkLoadingTimer;

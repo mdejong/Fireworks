@@ -14,7 +14,5 @@
 
 @interface LoadingViewController : UIViewController
 
-@property (nonatomic, retain) IBOutlet UIButton *button;
-
 @end
 

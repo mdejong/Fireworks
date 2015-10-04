@@ -10,12 +10,17 @@
 
 @interface AnimatingViewController ()
 
+@property (nonatomic, retain) IBOutlet UIView *wheelContainer;
+
 @end
 
 @implementation AnimatingViewController
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+ 
+  NSAssert(self.wheelContainer, @"wheelContainer");
+  
   return;
 }
 

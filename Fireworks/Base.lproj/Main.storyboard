@@ -52,8 +52,17 @@
                     <view key="view" contentMode="scaleToFill" id="bO3-ua-S6W">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="yvR-hX-uaN">
+                                <rect key="frame" x="74" y="261" width="380" height="217"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
+                        </subviews>
                         <color key="backgroundColor" red="0.0" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                     </view>
+                    <connections>
+                        <outlet property="wheelContainer" destination="yvR-hX-uaN" id="Voc-l8-Fxy"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Gfi-0i-cjX" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
