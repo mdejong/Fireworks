@@ -37,6 +37,9 @@
   
   NSAssert(self.button, @"button");
   
+  [self.button setTitle:@"Loading" forState:UIControlStateDisabled];
+  self.button.enabled = FALSE;
+  
   [self setupLoaders];
   
   self.startLoadingTimer = [AutoTimer autoTimerWithTimeInterval:0.10
@@ -111,6 +114,8 @@
     [timer invalidate];
     
     [self.button setTitle:@"Ready" forState:UIControlStateNormal];
+    
+    self.button.enabled = TRUE;
   }
 }
 
