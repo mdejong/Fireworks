@@ -8,10 +8,13 @@
 
 #import <UIKit/UIKit.h>
 
+@class MediaManager;
+
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 
+@property (strong, nonatomic) MediaManager *mediaManager;
 
 @end
 

@@ -8,13 +8,13 @@
 
 #import "LoadingViewController.h"
 
+#import "AppDelegate.h"
+
 #import "AutoTimer.h"
 
 #import "AVFileUtil.h"
 
-// Specific kind of resource to mvid converter to use
-
-#import "AVAsset2MvidResourceLoader.h"
+#import "MediaManager.h"
 
 @interface LoadingViewController ()
 
@@ -23,10 +23,6 @@
 @property (nonatomic, retain) AutoTimer *startLoadingTimer;
 
 @property (nonatomic, retain) AutoTimer *checkLoadingTimer;
-
-@property (nonatomic, retain) AVAsset2MvidResourceLoader *wheelLoader;
-
-@property (nonatomic, retain) AVAsset2MvidResourceLoader *redLoader;
 
 @end
 
@@ -40,11 +36,14 @@
   [self.button setTitle:@"Loading" forState:UIControlStateDisabled];
   self.button.enabled = FALSE;
   
-  [self setupLoaders];
+  AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+  MediaManager *mediaManager =appDelegate.mediaManager;
+  
+  [mediaManager makeLoaders];
   
   self.startLoadingTimer = [AutoTimer autoTimerWithTimeInterval:0.10
-                                                         target:self
-                                                       selector:@selector(startLoadingTimerCallback)
+                                                         target:mediaManager
+                                                       selector:@selector(startAsyncLoading)
                                                        userInfo:nil
                                                         repeats:FALSE];
   
@@ -56,59 +55,16 @@
   return;
 }
 
-- (void) setupLoaders
-{
-  NSString *resFilename;
-  NSString *outFilename;
-
-  resFilename = @"Wheel.m4v";
-  outFilename = @"Wheel.mvid";
-  
-  self.wheelLoader = [self loaderFor24BPPH264:resFilename outFilename:outFilename];
-  
-  resFilename = @"Red.m4v";
-  outFilename = @"Red.mvid";
-  
-  self.redLoader = [self loaderFor24BPPH264:resFilename outFilename:outFilename];
-}
-
-- (AVAsset2MvidResourceLoader*) loaderFor24BPPH264:(NSString*)resFilename
-                                       outFilename:(NSString*)outFilename
-{
-  AVAsset2MvidResourceLoader *loader = [AVAsset2MvidResourceLoader aVAsset2MvidResourceLoader];
-  
-  loader.movieFilename = resFilename;
-  
-  // Generate fully qualified path in tmp dir
-  
-  NSString *outPath = [AVFileUtil getTmpDirPath:outFilename];
-  loader.outPath = outPath;
-  
-  return loader;
-}
-
-- (void) startLoadingTimerCallback
-{
-  // Kick off async loading that will read .h264 and write .mvid to disk in tmp dir
-
-  for (AVResourceLoader *loader in @[self.wheelLoader, self.redLoader]) {
-    [loader load];
-  }
-}
-
 // Invoked once a second until all resources has been loaded in the background
 
 - (void) checkLoadingTimerCallback:(NSTimer*)timer
 {
   NSLog(@"checkLoadingTimerCallback");
   
-  BOOL allReady = TRUE;
+  AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+  MediaManager *mediaManager =appDelegate.mediaManager;
   
-  for (AVResourceLoader *loader in @[self.wheelLoader, self.redLoader]) {
-    if (loader.isReady == FALSE) {
-      allReady = FALSE;
-    }
-  }
+  BOOL allReady = [mediaManager allLoadersReady];
   
   if (allReady) {
     [timer invalidate];

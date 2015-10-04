@@ -8,6 +8,8 @@
 
 #import "AppDelegate.h"
 
+#import "MediaManager.h"
+
 @interface AppDelegate ()
 
 @end
@@ -17,6 +19,9 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   // Override point for customization after application launch.
+  
+  self.mediaManager = [MediaManager mediaManager];
+  
   return YES;
 }
 
