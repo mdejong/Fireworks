@@ -128,7 +128,7 @@
 {
   self.fireworksLabel.hidden = FALSE;
   
-  self.fireworksLabelTimer = [AutoTimer autoTimerWithTimeInterval:1.5
+  self.fireworksLabelTimer = [AutoTimer autoTimerWithTimeInterval:2.5
                                                            target:self
                                                          selector:@selector(stopAnimatingFireworkLabel)
                                                          userInfo:nil

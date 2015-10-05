@@ -4,6 +4,7 @@
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8154"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
         <!--Loading View Controller-->
@@ -78,11 +79,21 @@
                                     <constraint firstAttribute="height" constant="180" id="wYb-mh-Q10"/>
                                 </constraints>
                             </view>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="Moon.png" translatesAutoresizingMaskIntoConstraints="NO" id="uGy-sX-rTP">
+                                <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="100" id="XL8-5y-sAX"/>
+                                    <constraint firstAttribute="height" constant="100" id="fv7-vS-W6O"/>
+                                    <constraint firstAttribute="width" secondItem="uGy-sX-rTP" secondAttribute="height" multiplier="1:1" id="obl-EX-2C3"/>
+                                </constraints>
+                            </imageView>
                         </subviews>
                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
+                            <constraint firstItem="uGy-sX-rTP" firstAttribute="leading" secondItem="bO3-ua-S6W" secondAttribute="leadingMargin" id="0EN-Ij-f2q"/>
                             <constraint firstItem="5ZL-q3-NYj" firstAttribute="centerX" secondItem="bO3-ua-S6W" secondAttribute="centerX" id="5o5-ak-u0w"/>
                             <constraint firstItem="CBv-jp-wvH" firstAttribute="centerX" secondItem="bO3-ua-S6W" secondAttribute="centerX" id="AnE-LO-jDl"/>
+                            <constraint firstItem="uGy-sX-rTP" firstAttribute="top" secondItem="bO3-ua-S6W" secondAttribute="topMargin" id="Xdf-xG-LwI"/>
                             <constraint firstAttribute="right" secondItem="yvR-hX-uaN" secondAttribute="right" id="fR6-XE-oO0"/>
                             <constraint firstItem="5ZL-q3-NYj" firstAttribute="bottom" secondItem="CBv-jp-wvH" secondAttribute="top" id="gNE-hb-LNP"/>
                             <constraint firstItem="CBv-jp-wvH" firstAttribute="centerY" secondItem="bO3-ua-S6W" secondAttribute="centerY" id="h48-fS-Dr1"/>
@@ -100,4 +111,7 @@
             <point key="canvasLocation" x="1136" y="343"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="Moon.png" width="300" height="300"/>
+    </resources>
 </document>
