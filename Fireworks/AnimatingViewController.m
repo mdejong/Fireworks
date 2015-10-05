@@ -33,6 +33,12 @@
 
 @property (nonatomic, retain) AVAnimatorView *wheelAnimatorView;
 
+// The field is the extents of the (X,Y,W,H) where fireworks
+// can explode. The upper right corner is (0.0, 0.0) and the
+// lower right corner is at (1.0, 1.0)
+
+@property (nonatomic, retain) IBOutlet UIView *fieldContainer;
+
 @end
 
 @implementation AnimatingViewController

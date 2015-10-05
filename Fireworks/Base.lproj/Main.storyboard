@@ -64,14 +64,14 @@
                                     <constraint firstAttribute="width" secondItem="yvR-hX-uaN" secondAttribute="height" multiplier="30:17" id="vOf-rL-DxE"/>
                                 </constraints>
                             </view>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Fireworks!" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CBv-jp-wvH">
-                                <rect key="frame" x="206" y="275" width="227" height="51"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Fireworks!" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CBv-jp-wvH">
+                                <rect key="frame" x="193" y="271" width="215" height="58"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="48"/>
                                 <color key="textColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5ZL-q3-NYj" userLabel="Red Container">
-                                <rect key="frame" x="140" y="92" width="320" height="180"/>
+                                <rect key="frame" x="140" y="91" width="320" height="180"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="5ZL-q3-NYj" secondAttribute="height" multiplier="16:9" id="NQa-rE-oRC"/>
@@ -79,28 +79,37 @@
                                     <constraint firstAttribute="height" constant="180" id="wYb-mh-Q10"/>
                                 </constraints>
                             </view>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="Moon.png" translatesAutoresizingMaskIntoConstraints="NO" id="uGy-sX-rTP">
-                                <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Moon.png" translatesAutoresizingMaskIntoConstraints="NO" id="uGy-sX-rTP">
+                                <rect key="frame" x="20" y="0.0" width="100" height="100"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="100" id="XL8-5y-sAX"/>
                                     <constraint firstAttribute="height" constant="100" id="fv7-vS-W6O"/>
                                     <constraint firstAttribute="width" secondItem="uGy-sX-rTP" secondAttribute="height" multiplier="1:1" id="obl-EX-2C3"/>
                                 </constraints>
                             </imageView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="IWi-ud-Sae" userLabel="Field Container">
+                                <rect key="frame" x="0.0" y="60" width="600" height="440"/>
+                                <color key="backgroundColor" white="1" alpha="0.25" colorSpace="calibratedWhite"/>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
                             <constraint firstItem="uGy-sX-rTP" firstAttribute="leading" secondItem="bO3-ua-S6W" secondAttribute="leadingMargin" id="0EN-Ij-f2q"/>
+                            <constraint firstItem="9rT-Rp-QhC" firstAttribute="top" secondItem="IWi-ud-Sae" secondAttribute="bottom" constant="100" id="3X7-1K-WCc"/>
                             <constraint firstItem="5ZL-q3-NYj" firstAttribute="centerX" secondItem="bO3-ua-S6W" secondAttribute="centerX" id="5o5-ak-u0w"/>
                             <constraint firstItem="CBv-jp-wvH" firstAttribute="centerX" secondItem="bO3-ua-S6W" secondAttribute="centerX" id="AnE-LO-jDl"/>
+                            <constraint firstItem="IWi-ud-Sae" firstAttribute="centerX" secondItem="bO3-ua-S6W" secondAttribute="centerX" id="HPF-eu-cgB"/>
+                            <constraint firstItem="IWi-ud-Sae" firstAttribute="width" secondItem="bO3-ua-S6W" secondAttribute="width" id="VbA-UA-Zax"/>
                             <constraint firstItem="uGy-sX-rTP" firstAttribute="top" secondItem="bO3-ua-S6W" secondAttribute="topMargin" id="Xdf-xG-LwI"/>
                             <constraint firstAttribute="right" secondItem="yvR-hX-uaN" secondAttribute="right" id="fR6-XE-oO0"/>
                             <constraint firstItem="5ZL-q3-NYj" firstAttribute="bottom" secondItem="CBv-jp-wvH" secondAttribute="top" id="gNE-hb-LNP"/>
                             <constraint firstItem="CBv-jp-wvH" firstAttribute="centerY" secondItem="bO3-ua-S6W" secondAttribute="centerY" id="h48-fS-Dr1"/>
+                            <constraint firstItem="IWi-ud-Sae" firstAttribute="top" secondItem="HQ2-EA-tez" secondAttribute="bottom" constant="40" id="jcd-Ae-2RY"/>
                             <constraint firstItem="yvR-hX-uaN" firstAttribute="bottom" secondItem="bO3-ua-S6W" secondAttribute="bottom" id="kxZ-Bg-yE8"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="fieldContainer" destination="IWi-ud-Sae" id="OdM-b0-TI1"/>
                         <outlet property="fireworksLabel" destination="CBv-jp-wvH" id="vUF-5m-1mt"/>
                         <outlet property="redContainer" destination="5ZL-q3-NYj" id="eRq-GH-DHn"/>
                         <outlet property="wheelContainer" destination="yvR-hX-uaN" id="Voc-l8-Fxy"/>
