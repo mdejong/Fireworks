@@ -12,6 +12,7 @@
 
 @class AVAsset2MvidResourceLoader;
 @class AVAnimatorMedia;
+@class AVAssetJoinAlphaResourceLoader;
 
 @interface MediaManager : UIViewController
 
@@ -19,9 +20,13 @@
 
 @property (nonatomic, retain) AVAsset2MvidResourceLoader *redLoader;
 
+@property (nonatomic, retain) AVAssetJoinAlphaResourceLoader *L112Loader;
+
 @property (nonatomic, retain) AVAnimatorMedia *wheelMedia;
 
 @property (nonatomic, retain) AVAnimatorMedia *redMedia;
+
+@property (nonatomic, retain) AVAnimatorMedia *L112Media;
 
 // constructor
 

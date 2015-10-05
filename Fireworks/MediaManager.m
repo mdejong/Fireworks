@@ -16,6 +16,8 @@
 
 #import "AVAsset2MvidResourceLoader.h"
 
+#import "AVAssetJoinAlphaResourceLoader.h"
+
 @interface MediaManager ()
 
 @end
@@ -27,11 +29,11 @@
   return [[MediaManager alloc] init];
 }
 
-- (void) makeLoaders
+- (void) makeH264Loaders
 {
   NSString *resFilename;
   NSString *outFilename;
-
+  
   resFilename = @"Wheel.m4v";
   outFilename = @"Wheel.mvid";
   
@@ -41,6 +43,37 @@
   outFilename = @"Red.mvid";
   
   self.redLoader = [self loaderFor24BPPH264:resFilename outFilename:outFilename];
+}
+
+- (void) makeH264RGBAlphaLoaders
+{
+  NSString *rgbResourceName;
+  NSString *alphaResourceName;
+  NSString *rgbTmpMvidFilename;
+  NSString *rgbTmpMvidPath;
+  
+  rgbResourceName = @"11_2_rgb_CRF_30_24BPP.m4v";
+  alphaResourceName = @"11_2_alpha_CRF_30_24BPP.m4v";
+  rgbTmpMvidFilename = @"11_2_CRF_30_24BPP.mvid";
+  
+  rgbTmpMvidPath = [AVFileUtil getTmpDirPath:rgbTmpMvidFilename];
+  
+  AVAssetJoinAlphaResourceLoader *resLoader;
+  
+  resLoader = [AVAssetJoinAlphaResourceLoader aVAssetJoinAlphaResourceLoader];
+  
+  resLoader.movieRGBFilename = rgbResourceName;
+  resLoader.movieAlphaFilename = alphaResourceName;
+  resLoader.outPath = rgbTmpMvidPath;
+  resLoader.alwaysGenerateAdler = TRUE;
+  
+  self.L112Loader = resLoader;
+}
+
+- (void) makeLoaders
+{
+  [self makeH264Loaders];
+  [self makeH264RGBAlphaLoaders];
 }
 
 - (AVAsset2MvidResourceLoader*) loaderFor24BPPH264:(NSString*)resFilename
@@ -58,9 +91,11 @@
   return loader;
 }
 
+// Return array of all active loader objects
+
 - (NSArray*) getLoaders
 {
-  return @[self.wheelLoader, self.redLoader];
+  return @[self.wheelLoader, self.redLoader, self.L112Loader];
 }
 
 - (void) startAsyncLoading

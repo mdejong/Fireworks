@@ -17,6 +17,7 @@
 #import "AVAnimatorView.h"
 #import "AVAnimatorMedia.h"
 #import "AVAsset2MvidResourceLoader.h"
+#import "AVAssetJoinAlphaResourceLoader.h"
 #import "AVMvidFrameDecoder.h"
 
 @interface AnimatingViewController ()
@@ -38,6 +39,8 @@
 // lower right corner is at (1.0, 1.0)
 
 @property (nonatomic, retain) IBOutlet UIView *fieldContainer;
+
+@property (nonatomic, retain) AVAnimatorView *fieldSubview;
 
 @end
 
@@ -96,6 +99,16 @@
 
   [self.redContainer addSubview:redAnimatorView];
   
+  // L112
+  
+  mediaManager.L112Media = [AVAnimatorMedia aVAnimatorMedia];
+  
+  mediaManager.L112Media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
+  
+  mediaManager.L112Media.resourceLoader = mediaManager.L112Loader;
+
+  [mediaManager.L112Media prepareToAnimate];
+  
   // Invoke prepareToAnimate so that calling attachMedia will
   // set the image to the first frame in the already loaded media.
   
@@ -153,6 +166,67 @@
   
   [mediaManager.redMedia stopAnimator];
   [self.redContainer removeFromSuperview];
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+  [super touchesEnded:touches withEvent:event];
+  
+  NSLog(@"Touches Ended");
+  
+  if (self.fireworksLabel.hidden == FALSE) {
+    // Do not allow until label is hidden
+    return;
+  }
+  
+  [self logTouchesFor:event];
+  
+  CGPoint location = [self firstTouchLocation:event];
+  
+  // Detemine rough (0.0, 0.0) -> (1.0, 1.0) coordinates
+  
+  CGRect bounds = self.fieldContainer.bounds;
+  
+  if (self.fieldSubview == nil) {
+    AVAnimatorView *aVAnimatorView = [AVAnimatorView aVAnimatorViewWithFrame:bounds];
+    self.fieldSubview = aVAnimatorView;
+    [self.fieldContainer addSubview:self.fieldSubview];
+  } else {
+    [self.fieldSubview attachMedia:nil];
+  }
+  
+  AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+  MediaManager *mediaManager = appDelegate.mediaManager;
+  
+  [self.fieldSubview attachMedia:mediaManager.L112Media];
+  
+  [mediaManager.L112Media startAnimator];
+  
+  return;
+}
+
+- (void) logTouchesFor:(UIEvent*)event
+{
+  int count = 1;
+  
+  for (UITouch* touch in event.allTouches) {
+    CGPoint location = [touch locationInView:self.view];
+    
+    NSLog(@"%d: (%.0f, %.0f)", count, location.x, location.y);
+    
+//    CGPoint location = [touch locationInView:self.view];
+    
+    count++;
+  }
+}
+
+- (CGPoint) firstTouchLocation:(UIEvent*)event
+{
+  for (UITouch* touch in event.allTouches) {
+    CGPoint location = [touch locationInView:self.view];
+    return location;
+  }
+  return CGPointMake(0, 0);
 }
 
 @end
