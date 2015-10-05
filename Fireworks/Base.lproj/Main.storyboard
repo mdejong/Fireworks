@@ -63,26 +63,30 @@
                                     <constraint firstAttribute="width" secondItem="yvR-hX-uaN" secondAttribute="height" multiplier="30:17" id="vOf-rL-DxE"/>
                                 </constraints>
                             </view>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Fireworks!" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CBv-jp-wvH">
-                                <rect key="frame" x="206" y="275" width="189" height="51"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="42"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Fireworks!" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CBv-jp-wvH">
+                                <rect key="frame" x="206" y="275" width="227" height="51"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="48"/>
                                 <color key="textColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <view contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5ZL-q3-NYj" userLabel="Red Container">
-                                <rect key="frame" x="140" y="57" width="320" height="180"/>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5ZL-q3-NYj" userLabel="Red Container">
+                                <rect key="frame" x="140" y="92" width="320" height="180"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="5ZL-q3-NYj" secondAttribute="height" multiplier="16:9" id="NQa-rE-oRC"/>
+                                    <constraint firstAttribute="width" constant="320" id="w7Y-aH-LKJ"/>
+                                    <constraint firstAttribute="height" constant="180" id="wYb-mh-Q10"/>
+                                </constraints>
                             </view>
                         </subviews>
-                        <color key="backgroundColor" red="0.0" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
-                            <constraint firstItem="5ZL-q3-NYj" firstAttribute="width" secondItem="bO3-ua-S6W" secondAttribute="height" multiplier="8:15" id="5dn-s9-7yD"/>
+                            <constraint firstItem="5ZL-q3-NYj" firstAttribute="centerX" secondItem="bO3-ua-S6W" secondAttribute="centerX" id="5o5-ak-u0w"/>
                             <constraint firstItem="CBv-jp-wvH" firstAttribute="centerX" secondItem="bO3-ua-S6W" secondAttribute="centerX" id="AnE-LO-jDl"/>
                             <constraint firstAttribute="right" secondItem="yvR-hX-uaN" secondAttribute="right" id="fR6-XE-oO0"/>
+                            <constraint firstItem="5ZL-q3-NYj" firstAttribute="bottom" secondItem="CBv-jp-wvH" secondAttribute="top" id="gNE-hb-LNP"/>
                             <constraint firstItem="CBv-jp-wvH" firstAttribute="centerY" secondItem="bO3-ua-S6W" secondAttribute="centerY" id="h48-fS-Dr1"/>
                             <constraint firstItem="yvR-hX-uaN" firstAttribute="bottom" secondItem="bO3-ua-S6W" secondAttribute="bottom" id="kxZ-Bg-yE8"/>
-                            <constraint firstItem="5ZL-q3-NYj" firstAttribute="bottom" secondItem="CBv-jp-wvH" secondAttribute="top" id="q9L-v0-5Op"/>
-                            <constraint firstItem="5ZL-q3-NYj" firstAttribute="centerX" secondItem="bO3-ua-S6W" secondAttribute="centerX" id="yX5-xs-bRA"/>
                         </constraints>
                     </view>
                     <connections>

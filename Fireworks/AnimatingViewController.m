@@ -53,6 +53,9 @@
   NSAssert(wheelLoader, @"wheelLoader");
 
   AVAnimatorMedia *wheelMedia = [AVAnimatorMedia aVAnimatorMedia];
+  NSAssert(wheelMedia, @"wheelMedia");
+  
+  wheelMedia.animatorRepeatCount = 0xFFFF;
   
   mediaManager.wheelMedia = wheelMedia;
   
@@ -60,8 +63,6 @@
 
   AVMvidFrameDecoder *frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
   wheelMedia.frameDecoder = frameDecoder;
-  
-  [wheelMedia prepareToAnimate];
 
   //CGRect wheelFrame = self.wheelContainer.frame;
   CGRect wheelBounds = self.wheelContainer.bounds;
@@ -89,46 +90,38 @@
 
   [self.redContainer addSubview:redAnimatorView];
   
+  // Invoke prepareToAnimate so that calling attachMedia will
+  // set the image to the first frame in the already loaded media.
+  
+  [wheelMedia prepareToAnimate];
+  [redMedia prepareToAnimate];
+  
+  // Link media to views
+  
+  [wheelAnimatorView attachMedia:wheelMedia];
+  
+  [redAnimatorView attachMedia:redMedia];
+  
   return;
 }
 
 - (void) viewDidAppear:(BOOL)animated
-//- (void) viewWillAppear:(BOOL)animated
 {
-  AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-  MediaManager *mediaManager = appDelegate.mediaManager;
-
-  AVAnimatorMedia *wheelMedia = mediaManager.wheelMedia;
-  AVAnimatorView *wheelAnimatorView = self.wheelAnimatorView;
+  [super viewDidAppear:animated];
   
-  NSAssert(wheelMedia.resourceLoader, @"wheelMedia.resourceLoader");
-  NSAssert(wheelAnimatorView, @"wheelAnimatorView");
+  // Kick off fireworks label animation
   
-  [wheelAnimatorView attachMedia:wheelMedia];
-  
-  wheelMedia.animatorRepeatCount = 0xFFFF;
-  
-  [wheelMedia startAnimator];
-  
-  // Red Fireworks explosion
-  
-  AVAnimatorMedia *redMedia = mediaManager.redMedia;
-  AVAnimatorView *redAnimatorView = self.redAnimatorView;
-  
-  NSAssert(redMedia.resourceLoader, @"redMedia.resourceLoader");
-  NSAssert(redAnimatorView, @"redAnimatorView");
-
-  [redMedia startAnimator];
-
-  [redAnimatorView attachMedia:redMedia];
-  
-  // Kick off fireworks label animation times
-  
-  self.fireworksLabelTimer = [AutoTimer autoTimerWithTimeInterval:0.5
+  self.fireworksLabelTimer = [AutoTimer autoTimerWithTimeInterval:1.0
                                                             target:self
                                                           selector:@selector(startAnimatingFireworkLabel)
                                                           userInfo:nil
-                                                           repeats:FALSE];
+                                                          repeats:FALSE];
+  
+  AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+  MediaManager *mediaManager = appDelegate.mediaManager;
+  
+  [mediaManager.wheelMedia startAnimator];
+  [mediaManager.redMedia startAnimator];
 }
 
 - (void) startAnimatingFireworkLabel
@@ -149,6 +142,8 @@
  
   AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
   MediaManager *mediaManager = appDelegate.mediaManager;
+
+  // Put away the red opaque firework view
   
   [mediaManager.redMedia stopAnimator];
   [self.redContainer removeFromSuperview];
