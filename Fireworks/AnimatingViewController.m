@@ -25,6 +25,10 @@
 
 @property (nonatomic, retain) AutoTimer *fireworksLabelTimer;
 
+@property (nonatomic, retain) IBOutlet UIView *redContainer;
+
+@property (nonatomic, retain) AVAnimatorView *redAnimatorView;
+
 @property (nonatomic, retain) IBOutlet UIView *wheelContainer;
 
 @property (nonatomic, retain) AVAnimatorView *wheelAnimatorView;
@@ -37,6 +41,7 @@
   [super viewDidLoad];
  
   NSAssert(self.wheelContainer, @"wheelContainer");
+  NSAssert(self.redContainer, @"redContainer");
   NSAssert(self.fireworksLabel, @"fireworksLabel");
   
   self.fireworksLabel.hidden = TRUE;
@@ -65,7 +70,24 @@
   
   [self.wheelContainer addSubview:wheelAnimatorView];
   
-  // Note that attachMedia cannot be invoked here because view is being created now
+  // Create red animation
+  
+  AVAsset2MvidResourceLoader *redLoader = mediaManager.redLoader;
+  NSAssert(redLoader, @"redLoader");
+  
+  AVAnimatorMedia *redMedia = [AVAnimatorMedia aVAnimatorMedia];
+  
+	redMedia.resourceLoader = redLoader;
+  
+  mediaManager.redMedia = redMedia;
+  
+  CGRect redBounds = self.redContainer.bounds;
+  AVAnimatorView *redAnimatorView = [AVAnimatorView aVAnimatorViewWithFrame:redBounds];
+  self.redAnimatorView = redAnimatorView;
+  
+  redMedia.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
+
+  [self.redContainer addSubview:redAnimatorView];
   
   return;
 }
@@ -87,6 +109,18 @@
   wheelMedia.animatorRepeatCount = 0xFFFF;
   
   [wheelMedia startAnimator];
+  
+  // Red Fireworks explosion
+  
+  AVAnimatorMedia *redMedia = mediaManager.redMedia;
+  AVAnimatorView *redAnimatorView = self.redAnimatorView;
+  
+  NSAssert(redMedia.resourceLoader, @"redMedia.resourceLoader");
+  NSAssert(redAnimatorView, @"redAnimatorView");
+
+  [redMedia startAnimator];
+
+  [redAnimatorView attachMedia:redMedia];
   
   // Kick off fireworks label animation times
   
@@ -112,6 +146,12 @@
 {
   self.fireworksLabel.hidden = TRUE;
   self.fireworksLabelTimer = nil;
+ 
+  AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+  MediaManager *mediaManager = appDelegate.mediaManager;
+  
+  [mediaManager.redMedia stopAnimator];
+  [self.redContainer removeFromSuperview];
 }
 
 @end

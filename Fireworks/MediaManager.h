@@ -21,6 +21,8 @@
 
 @property (nonatomic, retain) AVAnimatorMedia *wheelMedia;
 
+@property (nonatomic, retain) AVAnimatorMedia *redMedia;
+
 // constructor
 
 + (MediaManager*) mediaManager;

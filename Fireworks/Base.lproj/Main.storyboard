@@ -69,17 +69,25 @@
                                 <color key="textColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <view contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5ZL-q3-NYj" userLabel="Red Container">
+                                <rect key="frame" x="140" y="57" width="320" height="180"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" red="0.0" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
+                            <constraint firstItem="5ZL-q3-NYj" firstAttribute="width" secondItem="bO3-ua-S6W" secondAttribute="height" multiplier="8:15" id="5dn-s9-7yD"/>
                             <constraint firstItem="CBv-jp-wvH" firstAttribute="centerX" secondItem="bO3-ua-S6W" secondAttribute="centerX" id="AnE-LO-jDl"/>
                             <constraint firstAttribute="right" secondItem="yvR-hX-uaN" secondAttribute="right" id="fR6-XE-oO0"/>
                             <constraint firstItem="CBv-jp-wvH" firstAttribute="centerY" secondItem="bO3-ua-S6W" secondAttribute="centerY" id="h48-fS-Dr1"/>
                             <constraint firstItem="yvR-hX-uaN" firstAttribute="bottom" secondItem="bO3-ua-S6W" secondAttribute="bottom" id="kxZ-Bg-yE8"/>
+                            <constraint firstItem="5ZL-q3-NYj" firstAttribute="bottom" secondItem="CBv-jp-wvH" secondAttribute="top" id="q9L-v0-5Op"/>
+                            <constraint firstItem="5ZL-q3-NYj" firstAttribute="centerX" secondItem="bO3-ua-S6W" secondAttribute="centerX" id="yX5-xs-bRA"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="fireworksLabel" destination="CBv-jp-wvH" id="vUF-5m-1mt"/>
+                        <outlet property="redContainer" destination="5ZL-q3-NYj" id="eRq-GH-DHn"/>
                         <outlet property="wheelContainer" destination="yvR-hX-uaN" id="Voc-l8-Fxy"/>
                     </connections>
                 </viewController>
