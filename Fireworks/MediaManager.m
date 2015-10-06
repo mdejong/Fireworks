@@ -12,6 +12,9 @@
 
 #import "AVFileUtil.h"
 
+#import "AVMvidFrameDecoder.h"
+#import "AVAnimatorMedia.h"
+
 // Specific kind of resource to mvid converter to use
 
 #import "AVAsset2MvidResourceLoader.h"
@@ -52,13 +55,16 @@
   NSString *rgbTmpMvidFilename;
   NSString *rgbTmpMvidPath;
   
+  AVAssetJoinAlphaResourceLoader *resLoader;
+  AVAnimatorMedia *media;
+  
+  // L112 : large double explosion
+  
   rgbResourceName = @"11_2_rgb_CRF_30_24BPP.m4v";
   alphaResourceName = @"11_2_alpha_CRF_30_24BPP.m4v";
   rgbTmpMvidFilename = @"11_2_CRF_30_24BPP.mvid";
   
   rgbTmpMvidPath = [AVFileUtil getTmpDirPath:rgbTmpMvidFilename];
-  
-  AVAssetJoinAlphaResourceLoader *resLoader;
   
   resLoader = [AVAssetJoinAlphaResourceLoader aVAssetJoinAlphaResourceLoader];
   
@@ -67,7 +73,64 @@
   resLoader.outPath = rgbTmpMvidPath;
   resLoader.alwaysGenerateAdler = TRUE;
   
+  media = [AVAnimatorMedia aVAnimatorMedia];
+  media.resourceLoader = resLoader;
+  media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
+  
+  [media prepareToAnimate];
+  
   self.L112Loader = resLoader;
+  self.L112Media = media;
+  
+  // L42 : Two explosions, roughly at same time, 2 fingers down on tap?
+  
+  rgbResourceName = @"4_2_rgb_CRF_30_24BPP.m4v";
+  alphaResourceName = @"4_2_alpha_CRF_30_24BPP.m4v";
+  rgbTmpMvidFilename = @"4_2_CRF_30_24BPP.mvid";
+  
+  rgbTmpMvidPath = [AVFileUtil getTmpDirPath:rgbTmpMvidFilename];
+  
+  resLoader = [AVAssetJoinAlphaResourceLoader aVAssetJoinAlphaResourceLoader];
+  
+  resLoader.movieRGBFilename = rgbResourceName;
+  resLoader.movieAlphaFilename = alphaResourceName;
+  resLoader.outPath = rgbTmpMvidPath;
+  resLoader.alwaysGenerateAdler = TRUE;
+  
+  media = [AVAnimatorMedia aVAnimatorMedia];
+  media.resourceLoader = resLoader;
+  media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
+  
+  [media prepareToAnimate];
+  
+  self.L42Loader = resLoader;
+  self.L42Media = media;
+  
+  // L92 : Two explosions, one after another (perhaps double tap)
+  
+  rgbResourceName = @"9_2_rgb_CRF_30_24BPP.m4v";
+  alphaResourceName = @"9_2_alpha_CRF_30_24BPP.m4v";
+  rgbTmpMvidFilename = @"9_2_CRF_30_24BPP.mvid";
+  
+  rgbTmpMvidPath = [AVFileUtil getTmpDirPath:rgbTmpMvidFilename];
+  
+  resLoader = [AVAssetJoinAlphaResourceLoader aVAssetJoinAlphaResourceLoader];
+  
+  resLoader.movieRGBFilename = rgbResourceName;
+  resLoader.movieAlphaFilename = alphaResourceName;
+  resLoader.outPath = rgbTmpMvidPath;
+  resLoader.alwaysGenerateAdler = TRUE;
+  
+  media = [AVAnimatorMedia aVAnimatorMedia];
+  media.resourceLoader = resLoader;
+  media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
+  
+  [media prepareToAnimate];
+  
+  self.L92Loader = resLoader;
+  self.L92Media = media;
+
+  return;
 }
 
 - (void) makeLoaders

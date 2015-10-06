@@ -99,16 +99,6 @@
 
   [self.redContainer addSubview:redAnimatorView];
   
-  // L112
-  
-  mediaManager.L112Media = [AVAnimatorMedia aVAnimatorMedia];
-  
-  mediaManager.L112Media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
-  
-  mediaManager.L112Media.resourceLoader = mediaManager.L112Loader;
-
-  [mediaManager.L112Media prepareToAnimate];
-  
   // Invoke prepareToAnimate so that calling attachMedia will
   // set the image to the first frame in the already loaded media.
   
@@ -183,9 +173,29 @@
   
   CGPoint location = [self firstTouchLocation:event];
   
-  // Detemine rough (0.0, 0.0) -> (1.0, 1.0) coordinates
+  // The location coordinate is in terms of the (X,Y) in self.view
   
+  float normX = location.x / self.view.bounds.size.width;
+  float normY = location.y / self.view.bounds.size.height;
+  
+  NSLog(@"(X,Y): (%d, %d)", (int)location.x, (int)location.y);
+  NSLog(@"(W x H): (%d x %d)", (int)self.view.bounds.size.width, (int)self.view.bounds.size.height);
+  NSLog(@"NORM (X,Y): (%f, %f)", normX, normY);
+  
+  // Map self.view norm coords into self.fieldContainer
+
+  CGRect frame = self.fieldContainer.frame;
   CGRect bounds = self.fieldContainer.bounds;
+  
+  NSLog(@"fieldContainer.frame : (%0.2f, %0.2f) %0.2f x %0.2f", frame.origin.x, frame.origin.y, frame.size.width, frame.size.height);
+  NSLog(@"fieldContainer.bounds : (%0.2f, %0.2f) %0.2f x %0.2f", bounds.origin.x, bounds.origin.y, bounds.size.width, bounds.size.height);
+  
+  int fieldContainerX = frame.origin.x + (frame.size.width * normX);
+  int fieldContainerY = frame.origin.y + (frame.size.height * normY);
+  
+  NSLog(@"fieldContainer (X,Y): (%d, %d)", fieldContainerX, fieldContainerY);
+  
+  // Detemine rough (0.0, 0.0) -> (1.0, 1.0) coordinates
   
   if (self.fieldSubview == nil) {
     AVAnimatorView *aVAnimatorView = [AVAnimatorView aVAnimatorViewWithFrame:bounds];
@@ -197,10 +207,39 @@
   
   AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
   MediaManager *mediaManager = appDelegate.mediaManager;
+
+  NSAssert(mediaManager.L42Media, @"L42Media");
+  NSAssert(mediaManager.L112Media, @"L112Media");
   
-  [self.fieldSubview attachMedia:mediaManager.L112Media];
+  AVAnimatorMedia *media = nil;
   
-  [mediaManager.L112Media startAnimator];
+  if (event.allTouches.count > 1) {
+    // More than 1 finger down on the touch
+    media = mediaManager.L42Media;
+  } else {
+    media = mediaManager.L112Media;
+  }
+  
+  NSAssert(media, @"selected media");
+  
+  // FIXME: adjust view bounds to 1:1 size video
+  
+  int mediaWidth = (int)media.frameDecoder.width;
+  int mediaHeight = (int)media.frameDecoder.height;
+  
+  int hW = mediaWidth / 2;
+  int hH = mediaHeight / 2;
+  
+  int originX = fieldContainerX - hW;
+  int originY = fieldContainerY - hH;
+  
+  self.fieldSubview.frame = CGRectMake(originX, originY, mediaWidth, mediaHeight);
+  
+  NSLog(@"subview (X,Y): (%f, %f) and W x H : (%f, %f)", self.fieldSubview.frame.origin.x, self.fieldSubview.frame.origin.y, self.fieldSubview.frame.size.width, self.fieldSubview.frame.size.width);
+  
+  [self.fieldSubview attachMedia:media];
+  
+  [media startAnimator];
   
   return;
 }
