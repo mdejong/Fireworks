@@ -83,11 +83,11 @@
   AVAssetJoinAlphaResourceLoader *resLoader;
   AVAnimatorMedia *media;
   
-  // L112 : large double explosion
+  // L12 : single firework
   
-  rgbResourceName = @"11_2_rgb_CRF_30_24BPP.m4v";
-  alphaResourceName = @"11_2_alpha_CRF_30_24BPP.m4v";
-  rgbTmpMvidFilename = @"11_2_CRF_30_24BPP.mvid";
+  rgbResourceName = @"1_2_rgb_CRF_30_24BPP.m4v";
+  alphaResourceName = @"1_2_alpha_CRF_30_24BPP.m4v";
+  rgbTmpMvidFilename = @"1_2_CRF_30_24BPP.mvid";
   
   rgbTmpMvidPath = [AVFileUtil getTmpDirPath:rgbTmpMvidFilename];
   
@@ -104,8 +104,56 @@
   
   NSAssert(resLoader, @"resLoader");
   NSAssert(media, @"media");
-  self.L112Loader = resLoader;
-  self.L112Media = media;
+  self.L12Loader = resLoader;
+  self.L12Media = media;
+  
+  // L22 :
+  
+  rgbResourceName = @"2_2_rgb_CRF_30_24BPP.m4v";
+  alphaResourceName = @"2_2_alpha_CRF_30_24BPP.m4v";
+  rgbTmpMvidFilename = @"2_2_CRF_30_24BPP.mvid";
+  
+  rgbTmpMvidPath = [AVFileUtil getTmpDirPath:rgbTmpMvidFilename];
+  
+  resLoader = [AVAssetJoinAlphaResourceLoader aVAssetJoinAlphaResourceLoader];
+  
+  resLoader.movieRGBFilename = rgbResourceName;
+  resLoader.movieAlphaFilename = alphaResourceName;
+  resLoader.outPath = rgbTmpMvidPath;
+  resLoader.alwaysGenerateAdler = TRUE;
+  
+  media = [AVAnimatorMedia aVAnimatorMedia];
+  media.resourceLoader = resLoader;
+  media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
+  
+  NSAssert(resLoader, @"resLoader");
+  NSAssert(media, @"media");
+  self.L22Loader = resLoader;
+  self.L22Media = media;
+
+  // L32 :
+  
+  rgbResourceName = @"3_2_rgb_CRF_30_24BPP.m4v";
+  alphaResourceName = @"3_2_alpha_CRF_30_24BPP.m4v";
+  rgbTmpMvidFilename = @"3_2_CRF_30_24BPP.mvid";
+  
+  rgbTmpMvidPath = [AVFileUtil getTmpDirPath:rgbTmpMvidFilename];
+  
+  resLoader = [AVAssetJoinAlphaResourceLoader aVAssetJoinAlphaResourceLoader];
+  
+  resLoader.movieRGBFilename = rgbResourceName;
+  resLoader.movieAlphaFilename = alphaResourceName;
+  resLoader.outPath = rgbTmpMvidPath;
+  resLoader.alwaysGenerateAdler = TRUE;
+  
+  media = [AVAnimatorMedia aVAnimatorMedia];
+  media.resourceLoader = resLoader;
+  media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
+  
+  NSAssert(resLoader, @"resLoader");
+  NSAssert(media, @"media");
+  self.L32Loader = resLoader;
+  self.L32Media = media;
   
   // L42 : Two explosions, roughly at same time, 2 fingers down on tap?
   
@@ -130,6 +178,54 @@
   NSAssert(media, @"media");
   self.L42Loader = resLoader;
   self.L42Media = media;
+
+  // L52 : Two explosions, roughly at same time, 2 fingers down on tap?
+  
+  rgbResourceName = @"5_2_rgb_CRF_30_24BPP.m4v";
+  alphaResourceName = @"5_2_alpha_CRF_30_24BPP.m4v";
+  rgbTmpMvidFilename = @"5_2_CRF_30_24BPP.mvid";
+  
+  rgbTmpMvidPath = [AVFileUtil getTmpDirPath:rgbTmpMvidFilename];
+  
+  resLoader = [AVAssetJoinAlphaResourceLoader aVAssetJoinAlphaResourceLoader];
+  
+  resLoader.movieRGBFilename = rgbResourceName;
+  resLoader.movieAlphaFilename = alphaResourceName;
+  resLoader.outPath = rgbTmpMvidPath;
+  resLoader.alwaysGenerateAdler = TRUE;
+  
+  media = [AVAnimatorMedia aVAnimatorMedia];
+  media.resourceLoader = resLoader;
+  media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
+  
+  NSAssert(resLoader, @"resLoader");
+  NSAssert(media, @"media");
+  self.L52Loader = resLoader;
+  self.L52Media = media;
+
+  // L62 :
+  
+  rgbResourceName = @"6_2_rgb_CRF_30_24BPP.m4v";
+  alphaResourceName = @"6_2_alpha_CRF_30_24BPP.m4v";
+  rgbTmpMvidFilename = @"6_2_CRF_30_24BPP.mvid";
+  
+  rgbTmpMvidPath = [AVFileUtil getTmpDirPath:rgbTmpMvidFilename];
+  
+  resLoader = [AVAssetJoinAlphaResourceLoader aVAssetJoinAlphaResourceLoader];
+  
+  resLoader.movieRGBFilename = rgbResourceName;
+  resLoader.movieAlphaFilename = alphaResourceName;
+  resLoader.outPath = rgbTmpMvidPath;
+  resLoader.alwaysGenerateAdler = TRUE;
+  
+  media = [AVAnimatorMedia aVAnimatorMedia];
+  media.resourceLoader = resLoader;
+  media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
+  
+  NSAssert(resLoader, @"resLoader");
+  NSAssert(media, @"media");
+  self.L62Loader = resLoader;
+  self.L62Media = media;
   
   // L92 : Two explosions, one after another (perhaps double tap)
   
@@ -154,6 +250,30 @@
   NSAssert(media, @"media");
   self.L92Loader = resLoader;
   self.L92Media = media;
+  
+  // L112 : large double explosion
+  
+  rgbResourceName = @"11_2_rgb_CRF_30_24BPP.m4v";
+  alphaResourceName = @"11_2_alpha_CRF_30_24BPP.m4v";
+  rgbTmpMvidFilename = @"11_2_CRF_30_24BPP.mvid";
+  
+  rgbTmpMvidPath = [AVFileUtil getTmpDirPath:rgbTmpMvidFilename];
+  
+  resLoader = [AVAssetJoinAlphaResourceLoader aVAssetJoinAlphaResourceLoader];
+  
+  resLoader.movieRGBFilename = rgbResourceName;
+  resLoader.movieAlphaFilename = alphaResourceName;
+  resLoader.outPath = rgbTmpMvidPath;
+  resLoader.alwaysGenerateAdler = TRUE;
+  
+  media = [AVAnimatorMedia aVAnimatorMedia];
+  media.resourceLoader = resLoader;
+  media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
+  
+  NSAssert(resLoader, @"resLoader");
+  NSAssert(media, @"media");
+  self.L112Loader = resLoader;
+  self.L112Media = media;
 
   return;
 }
@@ -183,14 +303,20 @@
 
 - (NSArray*) getAllMedia
 {
-  return @[self.wheelMedia, self.redMedia, self.L42Media, self.L92Media, self.L112Media];
+  NSMutableArray *mArr = [NSMutableArray array];
+  
+  [mArr addObject:self.wheelMedia];
+  [mArr addObject:self.redMedia];
+  [mArr addObjectsFromArray:[self getFireworkMedia]];
+  
+  return mArr;
 }
 
 // Return array of all alpha channel fireworks media
 
 - (NSArray*) getFireworkMedia
 {
-  return @[self.L42Media, self.L92Media, self.L112Media];
+  return @[self.L12Media, self.L22Media, self.L32Media, self.L42Media, self.L52Media, self.L62Media, self.L92Media, self.L112Media];
 }
 
 - (void) startAsyncLoading
