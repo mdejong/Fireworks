@@ -42,7 +42,7 @@
 
 @property (nonatomic, retain) IBOutlet UIView *fieldContainer;
 
-@property (nonatomic, retain) AVAnimatorView *fieldSubview;
+@property (nonatomic, retain) NSMutableArray *fieldSubviews;
 
 @end
 
@@ -171,13 +171,13 @@
   
   // Detemine rough (0.0, 0.0) -> (1.0, 1.0) coordinates
   
-  if (self.fieldSubview == nil) {
-    AVAnimatorView *aVAnimatorView = [AVAnimatorView aVAnimatorViewWithFrame:bounds];
-    self.fieldSubview = aVAnimatorView;
-    [self.fieldContainer addSubview:self.fieldSubview];
-  } else {
-    [self.fieldSubview attachMedia:nil];
-  }
+  AVAnimatorView *fieldSubview;
+
+  fieldSubview = [AVAnimatorView aVAnimatorViewWithFrame:bounds];
+
+  [self.fieldContainer addSubview:fieldSubview];
+  
+  [self.fieldSubviews addObject:fieldSubview];
   
   AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
   MediaManager *mediaManager = appDelegate.mediaManager;
@@ -196,6 +196,8 @@
   
   NSAssert(media, @"selected media");
   
+  [self stopMediaAndRemoveView:media];
+  
   // FIXME: adjust view bounds to 1:1 size video
   
   int mediaWidth = (int)media.frameDecoder.width;
@@ -207,16 +209,16 @@
   int originX = fieldContainerX - hW;
   int originY = fieldContainerY - hH;
   
-  self.fieldSubview.frame = CGRectMake(originX, originY, mediaWidth, mediaHeight);
+  fieldSubview.frame = CGRectMake(originX, originY, mediaWidth, mediaHeight);
   
-  NSLog(@"subview (X,Y): (%f, %f) and W x H : (%f, %f)", self.fieldSubview.frame.origin.x, self.fieldSubview.frame.origin.y, self.fieldSubview.frame.size.width, self.fieldSubview.frame.size.width);
-  
-  [self.fieldSubview attachMedia:media];
+  NSLog(@"subview (X,Y): (%f, %f) and W x H : (%f, %f)", fieldSubview.frame.origin.x, fieldSubview.frame.origin.y, fieldSubview.frame.size.width, fieldSubview.frame.size.width);
   
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(animatorDoneNotification:)
                                                name:AVAnimatorDoneNotification
                                              object:media];
+  
+  [fieldSubview attachMedia:media];
   
   [media startAnimator];
   
@@ -247,6 +249,23 @@
   return CGPointMake(0, 0);
 }
 
+- (void) stopMediaAndRemoveView:(AVAnimatorMedia*)media
+{
+  id<AVAnimatorMediaRendererProtocol> renderer = media.renderer;
+  AVAnimatorView *aVAnimatorView = (AVAnimatorView*) renderer;
+  
+  [media stopAnimator];
+
+  [aVAnimatorView attachMedia:nil];
+  
+  [aVAnimatorView removeFromSuperview];
+  
+  int numBefore = (int) self.fieldSubviews.count;
+  [self.fieldSubviews removeObject:aVAnimatorView];
+  int numAfter = (int) self.fieldSubviews.count;
+  NSAssert(numBefore == numAfter, @"numBefore == numAfter");
+}
+
 // Invoked when a specific firework media completes the animation cycle
 
 - (void)animatorDoneNotification:(NSNotification*)notification {
@@ -257,20 +276,7 @@
   
   [[NSNotificationCenter defaultCenter] removeObserver:self name:AVAnimatorDoneNotification object:media];
   
-  // AVAnimatorMediaPrivate
-  
-	id<AVAnimatorMediaRendererProtocol> renderer = media.renderer;
-  AVAnimatorView *view = (AVAnimatorView*) renderer;
-  
-  NSAssert(self.fieldSubview == view, @"fieldSubview");
-  
-  [media stopAnimator];
-  
-  [view attachMedia:nil];
-  
-  [view removeFromSuperview];
-  
-  self.fieldSubview = nil;
+  [self stopMediaAndRemoveView:media];
   
   return;
 }

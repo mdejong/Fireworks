@@ -69,7 +69,7 @@
   if (allReady) {
     [timer invalidate];
     
-    [self.button setTitle:@"Ready" forState:UIControlStateNormal];
+    [self.button setTitle:@"Start" forState:UIControlStateNormal];
     
     self.button.enabled = TRUE;
   }
