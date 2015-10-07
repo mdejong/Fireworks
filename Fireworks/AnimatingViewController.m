@@ -20,6 +20,8 @@
 #import "AVAssetJoinAlphaResourceLoader.h"
 #import "AVMvidFrameDecoder.h"
 
+#import "AVAnimatorMediaPrivate.h"
+
 @interface AnimatingViewController ()
 
 @property (nonatomic, retain) IBOutlet UILabel *fireworksLabel;
@@ -211,6 +213,11 @@
   
   [self.fieldSubview attachMedia:media];
   
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(animatorDoneNotification:)
+                                               name:AVAnimatorDoneNotification
+                                             object:media];
+  
   [media startAnimator];
   
   return;
@@ -238,6 +245,34 @@
     return location;
   }
   return CGPointMake(0, 0);
+}
+
+// Invoked when a specific firework media completes the animation cycle
+
+- (void)animatorDoneNotification:(NSNotification*)notification {
+  AVAnimatorMedia *media = notification.object;
+  NSAssert(media, @"*media");
+  
+  NSLog(@"animatorDoneNotification with media object %p", media);
+  
+  [[NSNotificationCenter defaultCenter] removeObserver:self name:AVAnimatorDoneNotification object:media];
+  
+  // AVAnimatorMediaPrivate
+  
+	id<AVAnimatorMediaRendererProtocol> renderer = media.renderer;
+  AVAnimatorView *view = (AVAnimatorView*) renderer;
+  
+  NSAssert(self.fieldSubview == view, @"fieldSubview");
+  
+  [media stopAnimator];
+  
+  [view attachMedia:nil];
+  
+  [view removeFromSuperview];
+  
+  self.fieldSubview = nil;
+  
+  return;
 }
 
 @end
