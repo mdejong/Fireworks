@@ -22,6 +22,8 @@
 
 #import "AVAnimatorMediaPrivate.h"
 
+#include <stdlib.h>
+
 @interface AnimatingViewController ()
 
 @property (nonatomic, retain) IBOutlet UILabel *fireworksLabel;
@@ -187,12 +189,18 @@
   
   AVAnimatorMedia *media = nil;
   
-  if (event.allTouches.count > 1) {
-    // More than 1 finger down on the touch
-    media = mediaManager.L42Media;
-  } else {
-    media = mediaManager.L112Media;
-  }
+//  if (event.allTouches.count > 1) {
+//    // More than 1 finger down on the touch
+//    media = mediaManager.L42Media;
+//  } else {
+//    media = mediaManager.L112Media;
+//  }
+  
+  // Randomly choose a firework to display
+  
+  NSArray *arr = [mediaManager getFireworkMedia];
+  int off = (int) arc4random_uniform((u_int32_t)arr.count);
+  media = arr[off];
   
   NSAssert(media, @"selected media");
   

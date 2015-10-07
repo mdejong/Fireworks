@@ -179,11 +179,18 @@
   return loader;
 }
 
-// Return array of all active loader objects
+// Return array of all active media objects
 
-- (NSArray*) getMedias
+- (NSArray*) getAllMedia
 {
   return @[self.wheelMedia, self.redMedia, self.L42Media, self.L92Media, self.L112Media];
+}
+
+// Return array of all alpha channel fireworks media
+
+- (NSArray*) getFireworkMedia
+{
+  return @[self.L42Media, self.L92Media, self.L112Media];
 }
 
 - (void) startAsyncLoading
@@ -193,7 +200,7 @@
   // if this method is not invoked in the initial viewDidLoad or init logic for the
   // app startup.
   
-  for (AVAnimatorMedia *media in [self getMedias]) {
+  for (AVAnimatorMedia *media in [self getAllMedia]) {
     [media prepareToAnimate];
   }
 }
@@ -204,7 +211,7 @@
 {
   BOOL allReady = TRUE;
   
-  for (AVAnimatorMedia *media in [self getMedias]) {
+  for (AVAnimatorMedia *media in [self getAllMedia]) {
     AVResourceLoader *loader = media.resourceLoader;
     if (loader.isReady == FALSE) {
       allReady = FALSE;
