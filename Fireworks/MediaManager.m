@@ -97,6 +97,7 @@
   resLoader.movieAlphaFilename = alphaResourceName;
   resLoader.outPath = rgbTmpMvidPath;
   resLoader.alwaysGenerateAdler = TRUE;
+  resLoader.serialLoading = TRUE;
   
   media = [AVAnimatorMedia aVAnimatorMedia];
   media.resourceLoader = resLoader;
@@ -121,6 +122,7 @@
   resLoader.movieAlphaFilename = alphaResourceName;
   resLoader.outPath = rgbTmpMvidPath;
   resLoader.alwaysGenerateAdler = TRUE;
+  resLoader.serialLoading = TRUE;
   
   media = [AVAnimatorMedia aVAnimatorMedia];
   media.resourceLoader = resLoader;
@@ -145,6 +147,7 @@
   resLoader.movieAlphaFilename = alphaResourceName;
   resLoader.outPath = rgbTmpMvidPath;
   resLoader.alwaysGenerateAdler = TRUE;
+  resLoader.serialLoading = TRUE;
   
   media = [AVAnimatorMedia aVAnimatorMedia];
   media.resourceLoader = resLoader;
@@ -169,6 +172,7 @@
   resLoader.movieAlphaFilename = alphaResourceName;
   resLoader.outPath = rgbTmpMvidPath;
   resLoader.alwaysGenerateAdler = TRUE;
+  resLoader.serialLoading = TRUE;
   
   media = [AVAnimatorMedia aVAnimatorMedia];
   media.resourceLoader = resLoader;
@@ -193,6 +197,7 @@
   resLoader.movieAlphaFilename = alphaResourceName;
   resLoader.outPath = rgbTmpMvidPath;
   resLoader.alwaysGenerateAdler = TRUE;
+  resLoader.serialLoading = TRUE;
   
   media = [AVAnimatorMedia aVAnimatorMedia];
   media.resourceLoader = resLoader;
@@ -217,6 +222,7 @@
   resLoader.movieAlphaFilename = alphaResourceName;
   resLoader.outPath = rgbTmpMvidPath;
   resLoader.alwaysGenerateAdler = TRUE;
+  resLoader.serialLoading = TRUE;
   
   media = [AVAnimatorMedia aVAnimatorMedia];
   media.resourceLoader = resLoader;
@@ -241,6 +247,7 @@
   resLoader.movieAlphaFilename = alphaResourceName;
   resLoader.outPath = rgbTmpMvidPath;
   resLoader.alwaysGenerateAdler = TRUE;
+  resLoader.serialLoading = TRUE;
   
   media = [AVAnimatorMedia aVAnimatorMedia];
   media.resourceLoader = resLoader;
@@ -265,6 +272,7 @@
   resLoader.movieAlphaFilename = alphaResourceName;
   resLoader.outPath = rgbTmpMvidPath;
   resLoader.alwaysGenerateAdler = TRUE;
+  resLoader.serialLoading = TRUE;
   
   media = [AVAnimatorMedia aVAnimatorMedia];
   media.resourceLoader = resLoader;
