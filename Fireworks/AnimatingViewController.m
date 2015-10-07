@@ -58,20 +58,8 @@
   AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
   MediaManager *mediaManager = appDelegate.mediaManager;
   
-  AVAsset2MvidResourceLoader *wheelLoader = mediaManager.wheelLoader;
-  NSAssert(wheelLoader, @"wheelLoader");
-
-  AVAnimatorMedia *wheelMedia = [AVAnimatorMedia aVAnimatorMedia];
-  NSAssert(wheelMedia, @"wheelMedia");
-  
+  AVAnimatorMedia *wheelMedia = mediaManager.wheelMedia;
   wheelMedia.animatorRepeatCount = 0xFFFF;
-  
-  mediaManager.wheelMedia = wheelMedia;
-  
-	wheelMedia.resourceLoader = wheelLoader;
-
-  AVMvidFrameDecoder *frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
-  wheelMedia.frameDecoder = frameDecoder;
 
   //CGRect wheelFrame = self.wheelContainer.frame;
   CGRect wheelBounds = self.wheelContainer.bounds;
@@ -82,33 +70,17 @@
   
   // Create red animation
   
-  AVAsset2MvidResourceLoader *redLoader = mediaManager.redLoader;
-  NSAssert(redLoader, @"redLoader");
-  
-  AVAnimatorMedia *redMedia = [AVAnimatorMedia aVAnimatorMedia];
-  
-	redMedia.resourceLoader = redLoader;
-  
-  mediaManager.redMedia = redMedia;
+  AVAnimatorMedia *redMedia = mediaManager.redMedia;
   
   CGRect redBounds = self.redContainer.bounds;
   AVAnimatorView *redAnimatorView = [AVAnimatorView aVAnimatorViewWithFrame:redBounds];
   self.redAnimatorView = redAnimatorView;
-  
-  redMedia.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
 
   [self.redContainer addSubview:redAnimatorView];
-  
-  // Invoke prepareToAnimate so that calling attachMedia will
-  // set the image to the first frame in the already loaded media.
-  
-  [wheelMedia prepareToAnimate];
-  [redMedia prepareToAnimate];
   
   // Link media to views
   
   [wheelAnimatorView attachMedia:wheelMedia];
-  
   [redAnimatorView attachMedia:redMedia];
   
   return;

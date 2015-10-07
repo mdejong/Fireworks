@@ -17,11 +17,9 @@
 @interface MediaManager : UIViewController
 
 @property (nonatomic, retain) AVAsset2MvidResourceLoader *wheelLoader;
-
-@property (nonatomic, retain) AVAsset2MvidResourceLoader *redLoader;
-
 @property (nonatomic, retain) AVAnimatorMedia *wheelMedia;
 
+@property (nonatomic, retain) AVAsset2MvidResourceLoader *redLoader;
 @property (nonatomic, retain) AVAnimatorMedia *redMedia;
 
 @property (nonatomic, retain) AVAssetJoinAlphaResourceLoader *L42Loader;

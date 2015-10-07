@@ -37,15 +37,40 @@
   NSString *resFilename;
   NSString *outFilename;
   
+  AVAsset2MvidResourceLoader *resLoader;
+  AVAnimatorMedia *media;
+  
+  // Create media object for "Wheel" animation
+  
   resFilename = @"Wheel.m4v";
   outFilename = @"Wheel.mvid";
   
-  self.wheelLoader = [self loaderFor24BPPH264:resFilename outFilename:outFilename];
+  resLoader = [self loaderFor24BPPH264:resFilename outFilename:outFilename];
+  
+  media = [AVAnimatorMedia aVAnimatorMedia];
+  media.resourceLoader = resLoader;
+  media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
+  
+  NSAssert(resLoader, @"resLoader");
+  NSAssert(media, @"media");
+  self.wheelLoader = resLoader;
+  self.wheelMedia = media;
+  
+  // Create media object for "Red" animation
   
   resFilename = @"Red.m4v";
   outFilename = @"Red.mvid";
   
-  self.redLoader = [self loaderFor24BPPH264:resFilename outFilename:outFilename];
+  resLoader = [self loaderFor24BPPH264:resFilename outFilename:outFilename];
+  
+  media = [AVAnimatorMedia aVAnimatorMedia];
+  media.resourceLoader = resLoader;
+  media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
+  
+  NSAssert(resLoader, @"resLoader");
+  NSAssert(media, @"media");
+  self.redLoader = resLoader;
+  self.redMedia = media;
 }
 
 - (void) makeH264RGBAlphaLoaders
@@ -77,8 +102,8 @@
   media.resourceLoader = resLoader;
   media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
   
-  [media prepareToAnimate];
-  
+  NSAssert(resLoader, @"resLoader");
+  NSAssert(media, @"media");
   self.L112Loader = resLoader;
   self.L112Media = media;
   
@@ -101,8 +126,8 @@
   media.resourceLoader = resLoader;
   media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
   
-  [media prepareToAnimate];
-  
+  NSAssert(resLoader, @"resLoader");
+  NSAssert(media, @"media");
   self.L42Loader = resLoader;
   self.L42Media = media;
   
@@ -125,8 +150,8 @@
   media.resourceLoader = resLoader;
   media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
   
-  [media prepareToAnimate];
-  
+  NSAssert(resLoader, @"resLoader");
+  NSAssert(media, @"media");
   self.L92Loader = resLoader;
   self.L92Media = media;
 
@@ -156,17 +181,20 @@
 
 // Return array of all active loader objects
 
-- (NSArray*) getLoaders
+- (NSArray*) getMedias
 {
-  return @[self.wheelLoader, self.redLoader, self.L112Loader];
+  return @[self.wheelMedia, self.redMedia, self.L42Media, self.L92Media, self.L112Media];
 }
 
 - (void) startAsyncLoading
 {
-  // Kick off async loading that will read .h264 and write .mvid to disk in tmp dir
-
-  for (AVResourceLoader *loader in [self getLoaders]) {
-    [loader load];
+  // Kick off async loading that will read .h264 and write .mvid to disk in tmp dir.
+  // Note that this method can kick off multiple pending timer events so it is useful
+  // if this method is not invoked in the initial viewDidLoad or init logic for the
+  // app startup.
+  
+  for (AVAnimatorMedia *media in [self getMedias]) {
+    [media prepareToAnimate];
   }
 }
 
@@ -176,7 +204,8 @@
 {
   BOOL allReady = TRUE;
   
-  for (AVResourceLoader *loader in [self getLoaders]) {
+  for (AVAnimatorMedia *media in [self getMedias]) {
+    AVResourceLoader *loader = media.resourceLoader;
     if (loader.isReady == FALSE) {
       allReady = FALSE;
     }
