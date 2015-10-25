@@ -14,7 +14,7 @@
 @class AVAnimatorMedia;
 @class AVAssetJoinAlphaResourceLoader;
 
-@interface MediaManager : UIViewController
+@interface MediaManager : NSObject
 
 @property (nonatomic, retain) AVAsset2MvidResourceLoader *wheelLoader;
 @property (nonatomic, retain) AVAnimatorMedia *wheelMedia;
