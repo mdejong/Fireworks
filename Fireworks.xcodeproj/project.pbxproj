@@ -16,9 +16,6 @@
 		3C4CF8EC1BC0B7D100B8BEB3 /* FireworksTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C4CF8EB1BC0B7D100B8BEB3 /* FireworksTests.m */; };
 		3C4CF8F71BC0B7D100B8BEB3 /* FireworksUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C4CF8F61BC0B7D100B8BEB3 /* FireworksUITests.m */; };
 		3C4CF9051BC0D1CE00B8BEB3 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C4CF9041BC0D1CE00B8BEB3 /* Default.png */; settings = {ASSET_TAGS = (); }; };
-		3C4CF9771BC0D77F00B8BEB3 /* AutoPropertyRelease.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C4CF9081BC0D77F00B8BEB3 /* AutoPropertyRelease.m */; settings = {ASSET_TAGS = (); }; };
-		3C4CF9781BC0D77F00B8BEB3 /* AutoPropertyRelease.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C4CF9081BC0D77F00B8BEB3 /* AutoPropertyRelease.m */; settings = {ASSET_TAGS = (); }; };
-		3C4CF9791BC0D77F00B8BEB3 /* AutoPropertyRelease.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C4CF9081BC0D77F00B8BEB3 /* AutoPropertyRelease.m */; settings = {ASSET_TAGS = (); }; };
 		3C4CF97A1BC0D77F00B8BEB3 /* ApngConvertMaxvid.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C4CF90B1BC0D77F00B8BEB3 /* ApngConvertMaxvid.m */; settings = {ASSET_TAGS = (); }; };
 		3C4CF97B1BC0D77F00B8BEB3 /* ApngConvertMaxvid.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C4CF90B1BC0D77F00B8BEB3 /* ApngConvertMaxvid.m */; settings = {ASSET_TAGS = (); }; };
 		3C4CF97C1BC0D77F00B8BEB3 /* ApngConvertMaxvid.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C4CF90B1BC0D77F00B8BEB3 /* ApngConvertMaxvid.m */; settings = {ASSET_TAGS = (); }; };
@@ -246,8 +243,6 @@
 		3C4CF8F61BC0B7D100B8BEB3 /* FireworksUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FireworksUITests.m; sourceTree = "<group>"; };
 		3C4CF8F81BC0B7D100B8BEB3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3C4CF9041BC0D1CE00B8BEB3 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
-		3C4CF9071BC0D77F00B8BEB3 /* AutoPropertyRelease.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AutoPropertyRelease.h; sourceTree = "<group>"; };
-		3C4CF9081BC0D77F00B8BEB3 /* AutoPropertyRelease.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AutoPropertyRelease.m; sourceTree = "<group>"; };
 		3C4CF90A1BC0D77F00B8BEB3 /* ApngConvertMaxvid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ApngConvertMaxvid.h; sourceTree = "<group>"; };
 		3C4CF90B1BC0D77F00B8BEB3 /* ApngConvertMaxvid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ApngConvertMaxvid.m; sourceTree = "<group>"; };
 		3C4CF90C1BC0D77F00B8BEB3 /* AV7zApng2MvidResourceLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AV7zApng2MvidResourceLoader.h; sourceTree = "<group>"; };
@@ -509,8 +504,6 @@
 			children = (
 				3C4CFA221BC0E25A00B8BEB3 /* AutoTimer.h */,
 				3C4CFA231BC0E25A00B8BEB3 /* AutoTimer.m */,
-				3C4CF9071BC0D77F00B8BEB3 /* AutoPropertyRelease.h */,
-				3C4CF9081BC0D77F00B8BEB3 /* AutoPropertyRelease.m */,
 				3C4CF9091BC0D77F00B8BEB3 /* AVAnimator */,
 				3C4CF9511BC0D77F00B8BEB3 /* LZMASDK */,
 			);
@@ -857,7 +850,6 @@
 				3C4CFA011BC0D77F00B8BEB3 /* Ppmd7.c in Sources */,
 				3C4CF9AA1BC0D77F00B8BEB3 /* AVFrameDecoder.m in Sources */,
 				3C4CFA1E1BC0DC6F00B8BEB3 /* AnimatingViewController.m in Sources */,
-				3C4CF9771BC0D77F00B8BEB3 /* AutoPropertyRelease.m in Sources */,
 				3C4CF9F21BC0D77F00B8BEB3 /* CpuArch.c in Sources */,
 				3C4CF9DD1BC0D77F00B8BEB3 /* 7zBuf.c in Sources */,
 				3C4CF9921BC0D77F00B8BEB3 /* AVAppResourceLoader.m in Sources */,
@@ -915,7 +907,6 @@
 				3C4CF9991BC0D77F00B8BEB3 /* AVAssetFrameDecoder.m in Sources */,
 				3C4CF9D81BC0D77F00B8BEB3 /* MutableAttrString.m in Sources */,
 				3C4CF9A21BC0D77F00B8BEB3 /* AVAssetWriterConvertFromMaxvid.m in Sources */,
-				3C4CF9781BC0D77F00B8BEB3 /* AutoPropertyRelease.m in Sources */,
 				3C4CF9C01BC0D77F00B8BEB3 /* CGFrameBuffer.m in Sources */,
 				3C4CF9ED1BC0D77F00B8BEB3 /* 7zStream.c in Sources */,
 				3C4CF9AB1BC0D77F00B8BEB3 /* AVFrameDecoder.m in Sources */,
@@ -978,7 +969,6 @@
 				3C4CF99A1BC0D77F00B8BEB3 /* AVAssetFrameDecoder.m in Sources */,
 				3C4CF9D91BC0D77F00B8BEB3 /* MutableAttrString.m in Sources */,
 				3C4CF9A31BC0D77F00B8BEB3 /* AVAssetWriterConvertFromMaxvid.m in Sources */,
-				3C4CF9791BC0D77F00B8BEB3 /* AutoPropertyRelease.m in Sources */,
 				3C4CF9C11BC0D77F00B8BEB3 /* CGFrameBuffer.m in Sources */,
 				3C4CF9EE1BC0D77F00B8BEB3 /* 7zStream.c in Sources */,
 				3C4CF9AC1BC0D77F00B8BEB3 /* AVFrameDecoder.m in Sources */,
