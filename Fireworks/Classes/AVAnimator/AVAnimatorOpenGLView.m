@@ -132,7 +132,13 @@ enum {
 
 + (AVAnimatorOpenGLView*) aVAnimatorOpenGLView
 {
-  return [AVAnimatorOpenGLView aVAnimatorOpenGLViewWithFrame:[UIScreen mainScreen].applicationFrame];
+  UIScreen *screen = [UIScreen mainScreen];
+#if defined(TARGET_OS_TV)
+  CGRect rect = screen.bounds;
+#else
+  CGRect rect = screen.applicationFrame;
+#endif // TARGET_OS_TV
+  return [AVAnimatorOpenGLView aVAnimatorOpenGLViewWithFrame:rect];
 }
 
 + (AVAnimatorOpenGLView*) aVAnimatorOpenGLViewWithFrame:(CGRect)viewFrame
@@ -232,6 +238,10 @@ enum {
 
 - (void) attachMedia:(AVAnimatorMedia*)inMedia
 {
+#if defined(DEBUG)
+  assert([NSThread currentThread] == [NSThread mainThread]);
+#endif // DEBUG
+  
   AVAnimatorMedia *currentMedia = self.mediaObj;
   
   if (currentMedia == inMedia) {

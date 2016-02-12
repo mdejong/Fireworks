@@ -10,9 +10,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 #import <AVFoundation/AVAudioPlayer.h>
-
-#import <AudioToolbox/AudioFile.h>
-#import "AudioToolbox/AudioServices.h"
+#import <AVFoundation/AVAudioSession.h>
 
 #import "CGFrameBuffer.h"
 #import "AVResourceLoader.h"
@@ -364,6 +362,10 @@
 
 - (void) _loadResourcesCallback:(NSTimer *)timer
 {
+#if defined(DEBUG)
+  assert([NSThread currentThread] == [NSThread mainThread]);
+#endif // DEBUG
+  
 #ifdef DEBUG_OUTPUT
   NSLog(@"AVAnimatorMedia: _loadResourcesCallback");
 #endif
@@ -456,6 +458,10 @@
 
 - (void) prepareToAnimate
 {
+#if defined(DEBUG)
+  assert([NSThread currentThread] == [NSThread mainThread]);
+#endif // DEBUG
+  
 	if (self.isReadyToAnimate) {
 		return;
 	} else if (self.state == PREPPING) {
@@ -564,6 +570,10 @@
 
 - (void) startAnimator
 {
+#if defined(DEBUG)
+  assert([NSThread currentThread] == [NSThread mainThread]);
+#endif // DEBUG
+  
 #ifdef DEBUG_OUTPUT
 	if (TRUE) {
 		NSLog(@"startAnimator: ");
@@ -672,23 +682,29 @@
   return;
 }
 
--(void)_setAudioSessionCategory {
-	// Define audio session as MediaPlayback, so that audio output is not silenced
-	// when the silent switch is set. This is a non-mixing mode, so any audio
-	// being played is silenced.
+- (void) _setAudioSessionCategory {
+  NSError *audioSessionError = nil;
   
-	UInt32 sessionCategory = kAudioSessionCategory_MediaPlayback;
-	OSStatus result =
-	AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(sessionCategory), &sessionCategory);
-	if (result != 0) {
-		NSLog(@"%@", [NSString stringWithFormat:@"AudioSessionSetProperty(kAudioSessionProperty_AudioCategory,kAudioSessionCategory_MediaPlayback) error : %d", (int)result]);
-	}
+  // Define audio session as AVAudioSessionCategoryPlayback, so that audio output is not silenced
+  // when the silent switch is set. This is a non-mixing mode, so any audio
+  // being played is silenced.
+  
+  NSString *theCategory = AVAudioSessionCategoryPlayback;
+  [[AVAudioSession sharedInstance] setCategory:theCategory error:&audioSessionError];
+  
+  if (audioSessionError) {
+    NSLog(@"%@", [NSString stringWithFormat:@"AVAudioSession.setCategory(%@) error : %ld : %@", theCategory, (long)audioSessionError.code, audioSessionError.localizedDescription]);
+  }
 }
 
 // Invoke this method to stop the animator and cancel all callbacks.
 
 - (void) stopAnimator
 {
+#if defined(DEBUG)
+  assert([NSThread currentThread] == [NSThread mainThread]);
+#endif // DEBUG
+  
 #ifdef DEBUG_OUTPUT
 	if (TRUE) {
 		NSLog(@"stopAnimator: ");
@@ -767,6 +783,10 @@
 
 - (void) pause
 {
+#if defined(DEBUG)
+  assert([NSThread currentThread] == [NSThread mainThread]);
+#endif // DEBUG
+  
   if (self.state != ANIMATING) {
     // Ignore since an odd race condition could happen when window is put away or when
     // incoming call triggers this method.
@@ -808,6 +828,10 @@
 
 - (void) unpause
 {
+#if defined(DEBUG)
+  assert([NSThread currentThread] == [NSThread mainThread]);
+#endif // DEBUG
+  
   if (self.state != PAUSED) {
     return;
   }
@@ -1068,8 +1092,12 @@
 // loop will display the next frame as soon as possible.
 
 - (void) _animatorDecodeFrameCallback: (NSTimer *)timer {
+#if defined(DEBUG)
+  assert([NSThread currentThread] == [NSThread mainThread]);
+#endif // DEBUG
+  
   if (self.state != ANIMATING) {
-    NSAssert(FALSE, @"state is not ANIMATING");
+    NSAssert(FALSE, @"state is not ANIMATING in _animatorDecodeFrameCallback : %@", [self description]);
   }
   
 	NSTimeInterval currentTime;
@@ -1318,8 +1346,12 @@
 // as soon as possible.
 
 - (void) _animatorDisplayFrameCallback: (NSTimer *)timer {
+#if defined(DEBUG)
+  assert([NSThread currentThread] == [NSThread mainThread]);
+#endif // DEBUG
+  
   if (self->m_state != ANIMATING) {
-    NSAssert(FALSE, @"state is not ANIMATING");
+    NSAssert(FALSE, @"state is not ANIMATING in _animatorDisplayFrameCallback : %@", [self description]);
   }
   
 #ifdef DEBUG_OUTPUT
@@ -1377,6 +1409,10 @@
 // should only be called when the animator is not running.
 
 - (void) showFrame: (NSInteger) frame {
+#if defined(DEBUG)
+  assert([NSThread currentThread] == [NSThread mainThread]);
+#endif // DEBUG
+  
 	if ((frame >= self.animatorNumFrames) || (frame < 0) || frame == self.currentFrame)
 		return;
 	

@@ -62,7 +62,13 @@
 
 + (AVAnimatorView*) aVAnimatorView
 {
-  return [AVAnimatorView aVAnimatorViewWithFrame:[UIScreen mainScreen].applicationFrame];
+  UIScreen *screen = [UIScreen mainScreen];
+#if defined(TARGET_OS_TV)
+  CGRect rect = screen.bounds;
+#else
+  CGRect rect = screen.applicationFrame;
+#endif // TARGET_OS_TV
+  return [AVAnimatorView aVAnimatorViewWithFrame:rect];
 }
 
 + (AVAnimatorView*) aVAnimatorViewWithFrame:(CGRect)viewFrame
@@ -307,6 +313,10 @@
 
 - (void) attachMedia:(AVAnimatorMedia*)inMedia
 {
+#if defined(DEBUG)
+  assert([NSThread currentThread] == [NSThread mainThread]);
+#endif // DEBUG
+  
   AVAnimatorMedia *currentMedia = self.mediaObj;
   
   if (currentMedia == inMedia) {
