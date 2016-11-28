@@ -18,6 +18,11 @@
 
 @synthesize outPath = m_outPath;
 @synthesize alwaysGenerateAdler = m_alwaysGenerateAdler;
+@synthesize movieSize = m_movieSize;
+
+#if defined(HAS_LIB_COMPRESSION_API)
+@synthesize compressed = m_compressed;
+#endif // HAS_LIB_COMPRESSION_API
 
 + (AVAsset2MvidResourceLoader*) aVAsset2MvidResourceLoader
 {
@@ -45,15 +50,23 @@
 + (void) decodeThreadEntryPoint:(NSArray*)arr {  
   @autoreleasepool {
   
-  NSAssert([arr count] == 5, @"arr count");
+  NSAssert([arr count] == 8, @"arr count");
   
-  // Pass 5 arguments : ASSET_PATH PHONY_PATH TMP_PATH SERIAL ADLER
+  // Pass 5 arguments : ASSET_PATH PHONY_PATH TMP_PATH SERIAL ADLER RENDER_WIDTH RENDER_HEIGHT IS_COMPRESSED
   
   NSString *assetPath = [arr objectAtIndex:0];
   NSString *phonyOutPath = [arr objectAtIndex:1];
   NSString *outPath = [arr objectAtIndex:2];
   NSNumber *serialLoadingNum = [arr objectAtIndex:3];
   NSNumber *alwaysGenerateAdler = [arr objectAtIndex:4];
+  NSNumber *renderWidthNum = [arr objectAtIndex:5];
+  NSNumber *renderHeightNum = [arr objectAtIndex:6];
+  NSNumber *isCompressedNum = [arr objectAtIndex:7];
+  
+  BOOL compressed = [isCompressedNum boolValue];
+  compressed = compressed; // avoid compiler wanring
+    
+  CGSize renderSize = CGSizeMake([renderWidthNum intValue], [renderHeightNum intValue]);
   
   if ([serialLoadingNum boolValue]) {
     [self grabSerialResourceLoaderLock];
@@ -79,6 +92,11 @@
     AVAssetReaderConvertMaxvid *obj = [AVAssetReaderConvertMaxvid aVAssetReaderConvertMaxvid];
     obj.assetURL = [NSURL fileURLWithPath:assetPath];
     obj.mvidPath = phonyOutPath;
+    obj.movieSize = renderSize;
+    
+#if defined(HAS_LIB_COMPRESSION_API)
+    obj.compressed = compressed;
+#endif // HAS_LIB_COMPRESSION_API
     
     if ([alwaysGenerateAdler intValue]) {
       obj.genAdler = TRUE;
@@ -96,7 +114,18 @@
     [AVFileUtil renameFile:phonyOutPath toPath:outPath];
     
 #ifdef LOGGING
-    NSLog(@"wrote %@", outPath);
+    {
+      // Query the file length for the container, will be returned by length getter.
+      // If the file does not exist, then nil is returned.
+      NSDictionary *attrs = [[NSFileManager defaultManager] attributesOfItemAtPath:outPath error:nil];
+      if (attrs != nil) {
+        unsigned long long fileSize = [attrs fileSize];
+        size_t fileSizeT = (size_t) fileSize;
+        NSAssert(fileSize == fileSizeT, @"assignment from unsigned long long to size_t lost bits");
+        
+        NSLog(@"wrote \"%@\" at size %d kB", outPath, (int)fileSizeT/1000);
+      }
+    }
 #endif // LOGGING
   }
   
@@ -117,8 +146,17 @@
   NSNumber *genAdlerNum = [NSNumber numberWithInt:genAdler];
   NSAssert(genAdlerNum != nil, @"genAdlerNum");
   
-  NSArray *arr = [NSArray arrayWithObjects:assetPath, phonyOutPath, outPath, serialLoadingNum, genAdlerNum, nil];
-  NSAssert([arr count] == 5, @"arr count");
+  int renderWidth = self.movieSize.width;
+  int renderHeight = self.movieSize.height;
+  
+#if defined(HAS_LIB_COMPRESSION_API)
+  NSNumber *isCompressedNum = [NSNumber numberWithBool:self.compressed];
+#else
+  NSNumber *isCompressedNum = [NSNumber numberWithBool:false];
+#endif // HAS_LIB_COMPRESSION_API
+  
+  NSArray *arr = [NSArray arrayWithObjects:assetPath, phonyOutPath, outPath, serialLoadingNum, genAdlerNum, @(renderWidth), @(renderHeight), isCompressedNum, nil];
+  NSAssert([arr count] == 8, @"arr count");
   
   [NSThread detachNewThreadSelector:@selector(decodeThreadEntryPoint:) toTarget:self.class withObject:arr];  
 }

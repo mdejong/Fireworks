@@ -184,6 +184,8 @@
 		3C4CFA291BC0F36500B8BEB3 /* MediaManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C4CFA281BC0F36500B8BEB3 /* MediaManager.m */; };
 		3C4CFA2A1BC0F36500B8BEB3 /* MediaManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C4CFA281BC0F36500B8BEB3 /* MediaManager.m */; };
 		3C4CFA2B1BC0F36500B8BEB3 /* MediaManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C4CFA281BC0F36500B8BEB3 /* MediaManager.m */; };
+		3C5DC57C1DECAF170029A61F /* AVAnimatorH264AlphaPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C5DC5791DECAF170029A61F /* AVAnimatorH264AlphaPlayer.m */; };
+		3C5DC57D1DECAF170029A61F /* AVStreamEncodeDecode.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C5DC57B1DECAF170029A61F /* AVStreamEncodeDecode.m */; };
 		3C5DE8551BC361A400518DCC /* 1_2_alpha_CRF_30_24BPP.m4v in Resources */ = {isa = PBXBuildFile; fileRef = 3C5DE8471BC361A400518DCC /* 1_2_alpha_CRF_30_24BPP.m4v */; };
 		3C5DE8561BC361A400518DCC /* 1_2_rgb_CRF_30_24BPP.m4v in Resources */ = {isa = PBXBuildFile; fileRef = 3C5DE8481BC361A400518DCC /* 1_2_rgb_CRF_30_24BPP.m4v */; };
 		3C5DE8571BC361A400518DCC /* 2_2_alpha_CRF_30_24BPP.m4v in Resources */ = {isa = PBXBuildFile; fileRef = 3C5DE8491BC361A400518DCC /* 2_2_alpha_CRF_30_24BPP.m4v */; };
@@ -361,6 +363,10 @@
 		3C4CFA231BC0E25A00B8BEB3 /* AutoTimer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AutoTimer.m; sourceTree = "<group>"; };
 		3C4CFA271BC0F36500B8BEB3 /* MediaManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediaManager.h; sourceTree = "<group>"; };
 		3C4CFA281BC0F36500B8BEB3 /* MediaManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MediaManager.m; sourceTree = "<group>"; };
+		3C5DC5781DECAF170029A61F /* AVAnimatorH264AlphaPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVAnimatorH264AlphaPlayer.h; sourceTree = "<group>"; };
+		3C5DC5791DECAF170029A61F /* AVAnimatorH264AlphaPlayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVAnimatorH264AlphaPlayer.m; sourceTree = "<group>"; };
+		3C5DC57A1DECAF170029A61F /* AVStreamEncodeDecode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVStreamEncodeDecode.h; sourceTree = "<group>"; };
+		3C5DC57B1DECAF170029A61F /* AVStreamEncodeDecode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVStreamEncodeDecode.m; sourceTree = "<group>"; };
 		3C5DE8471BC361A400518DCC /* 1_2_alpha_CRF_30_24BPP.m4v */ = {isa = PBXFileReference; lastKnownFileType = file; path = 1_2_alpha_CRF_30_24BPP.m4v; sourceTree = "<group>"; };
 		3C5DE8481BC361A400518DCC /* 1_2_rgb_CRF_30_24BPP.m4v */ = {isa = PBXFileReference; lastKnownFileType = file; path = 1_2_rgb_CRF_30_24BPP.m4v; sourceTree = "<group>"; };
 		3C5DE8491BC361A400518DCC /* 2_2_alpha_CRF_30_24BPP.m4v */ = {isa = PBXFileReference; lastKnownFileType = file; path = 2_2_alpha_CRF_30_24BPP.m4v; sourceTree = "<group>"; };
@@ -518,6 +524,10 @@
 		3C4CF9091BC0D77F00B8BEB3 /* AVAnimator */ = {
 			isa = PBXGroup;
 			children = (
+				3C5DC5781DECAF170029A61F /* AVAnimatorH264AlphaPlayer.h */,
+				3C5DC5791DECAF170029A61F /* AVAnimatorH264AlphaPlayer.m */,
+				3C5DC57A1DECAF170029A61F /* AVStreamEncodeDecode.h */,
+				3C5DC57B1DECAF170029A61F /* AVStreamEncodeDecode.m */,
 				3C4CF90A1BC0D77F00B8BEB3 /* ApngConvertMaxvid.h */,
 				3C4CF90B1BC0D77F00B8BEB3 /* ApngConvertMaxvid.m */,
 				3C4CF90C1BC0D77F00B8BEB3 /* AV7zApng2MvidResourceLoader.h */,
@@ -833,6 +843,7 @@
 				3C4CF9E01BC0D77F00B8BEB3 /* 7zBuf2.c in Sources */,
 				3C4CF9981BC0D77F00B8BEB3 /* AVAssetFrameDecoder.m in Sources */,
 				3C4CF9EC1BC0D77F00B8BEB3 /* 7zStream.c in Sources */,
+				3C5DC57D1DECAF170029A61F /* AVStreamEncodeDecode.m in Sources */,
 				3C4CF9831BC0D77F00B8BEB3 /* AVAnimatorLayer.m in Sources */,
 				3C4CFA101BC0D77F00B8BEB3 /* 7zMain.c in Sources */,
 				3C4CF9AD1BC0D77F00B8BEB3 /* AVGIF89A2MvidResourceLoader.m in Sources */,
@@ -869,6 +880,7 @@
 				3C4CF99E1BC0D77F00B8BEB3 /* AVAssetReaderConvertMaxvid.m in Sources */,
 				3C4CF9C81BC0D77F00B8BEB3 /* maxvid_decode_arm.s in Sources */,
 				3C4CF97D1BC0D77F00B8BEB3 /* AV7zApng2MvidResourceLoader.m in Sources */,
+				3C5DC57C1DECAF170029A61F /* AVAnimatorH264AlphaPlayer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

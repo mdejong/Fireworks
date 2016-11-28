@@ -27,6 +27,8 @@
 
 #import "MutableAttrString.h"
 
+#import "AVStreamEncodeDecode.h"
+
 //#if defined(DEBUG)
 //# define LOGGING
 //#endif // DEBUG
@@ -158,6 +160,11 @@ typedef enum
 
 @synthesize compScale = m_compScale;
 
+#if defined(HAS_LIB_COMPRESSION_API)
+@synthesize compressedIntermediate = m_compressedIntermediate;
+@synthesize compressedOutput = m_compressedOutput;
+#endif // HAS_LIB_COMPRESSION_API
+
 // Constructor
 
 + (AVOfflineComposition*) aVOfflineComposition
@@ -262,7 +269,10 @@ typedef enum
   NSString *resPath = [[NSBundle mainBundle] pathForResource:resFileName ofType:@""];  
   plistData = [NSData dataWithContentsOfFile:resPath];   
   
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
   plist = [NSPropertyListSerialization propertyListFromData:plistData mutabilityOption:NSPropertyListImmutable format:&format errorDescription:&error];
+#pragma clang diagnostic pop
   if (!plist) {
     NSLog(@"Error reading plist from file '%s', error = '%s'", [resFileName UTF8String], [error UTF8String]);
 #if __has_feature(objc_arc)
@@ -816,6 +826,12 @@ CF_RETURNS_RETAINED
         converter.mvidPath = phonyOutPath;
         
         //converter.genAdler = TRUE;
+
+#if defined(HAS_LIB_COMPRESSION_API)
+        if (self.compressedIntermediate) {
+          converter.compressed = TRUE;
+        }
+#endif // HAS_LIB_COMPRESSION_API
         
 #ifdef LOGGING
         NSLog(@"decoding h264 clip asset %@", [movPath lastPathComponent]);
@@ -1081,6 +1097,8 @@ CF_RETURNS_RETAINED
   AVMvidFileWriter *fileWriter = [AVMvidFileWriter aVMvidFileWriter];
   NSAssert(fileWriter, @"fileWriter");
   
+  fileWriter.genV3 = TRUE;
+  
   fileWriter.mvidPath = phonyOutPath;
   fileWriter.bpp = 24;
   fileWriter.movieSize = CGSizeMake(scaledWidth, scaledHeight);
@@ -1094,6 +1112,10 @@ CF_RETURNS_RETAINED
   if (worked == FALSE) {
     retcode = FALSE;
   }
+  
+#if defined(HAS_LIB_COMPRESSION_API)
+  NSMutableData *mEncodedData = nil;
+#endif // HAS_LIB_COMPRESSION_API
   
   for (NSUInteger frame = 0; retcode && (frame < maxFrame); frame++) {
     // Clear the entire frame to the background color with a simple fill
@@ -1114,7 +1136,41 @@ CF_RETURNS_RETAINED
     
     // Write frame buffer out to .mvid container
     
-    worked = [fileWriter writeKeyframe:(char*)cgFrameBuffer.pixels bufferSize:(int)cgFrameBuffer.numBytes];
+#if defined(HAS_LIB_COMPRESSION_API)
+    // If compression is used, then generate a compressed buffer and write it as a keyframe.
+    
+    if (self.compressedOutput) @autoreleasepool {
+      NSData *pixelData = [NSData dataWithBytesNoCopy:(char*)cgFrameBuffer.pixels length:(int)cgFrameBuffer.numBytes freeWhenDone:NO];
+      
+      if (mEncodedData == nil) {
+        mEncodedData = [NSMutableData data];
+      }
+      
+      [AVStreamEncodeDecode streamDeltaAndCompress:pixelData
+                                       encodedData:mEncodedData
+                                               bpp:fileWriter.bpp
+                                         algorithm:COMPRESSION_LZ4];
+      
+      //int src_size = (int)cgFrameBuffer.numBytes;
+      assert(mEncodedData.length < 0xFFFFFFFF);
+      int dst_size = (int) mEncodedData.length;
+      
+      //printf("compressed frame size %d kB down to %d kB\n", (int)src_size/1000, (int)dst_size/1000);
+      
+      // Calculate adler based on original pixels (not the compressed representation)
+      
+      uint32_t adler = 0;
+      
+      if (fileWriter.genAdler) {
+        adler = maxvid_adler32(0, (unsigned char*)pixelData.bytes, (int)pixelData.length);
+      }
+      
+      worked = [fileWriter writeKeyframe:(char*)mEncodedData.bytes bufferSize:(int)dst_size adler:adler isCompressed:TRUE];
+    } else
+#endif // HAS_LIB_COMPRESSION_API
+    {
+      worked = [fileWriter writeKeyframe:(char*)cgFrameBuffer.pixels bufferSize:(int)cgFrameBuffer.numBytes];
+    }
     
     if (worked == FALSE) {
       retcode = FALSE;

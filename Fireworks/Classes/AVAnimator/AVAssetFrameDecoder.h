@@ -49,6 +49,8 @@
   BOOL m_isReading;
   BOOL m_readingFinished;
   BOOL m_produceCoreVideoPixelBuffers;
+  BOOL m_produceYUV420Buffers;
+  BOOL m_dropFrames;
 }
 
 @property (nonatomic, readonly) NSUInteger  numFrames;
@@ -64,6 +66,21 @@
 // only be set before rendering of frames begins.
 
 @property (nonatomic, assign) BOOL produceCoreVideoPixelBuffers;
+
+// If self.produceCoreVideoPixelBuffers is TRUE and this flag is set then the
+// H264 decoder will produce YUV 4:2:0 buffers as opposed to a flat BGRA buffer.
+// A 4:2:0 features subsampling for the UV components.
+
+@property (nonatomic, assign) BOOL produceYUV420Buffers;
+
+// This flag defaults to TRUE, when it is TRUE then the decoder will drop
+// a frame if the indicated display time less than the expected interval
+// time to the next frame. Note that this frame drop logic is not always
+// correct, in the case where a video encodes a frame at a time and no
+// frame should be dropped based on the timing info, then this flag should
+// be set to FALSE.
+
+@property (nonatomic, assign) BOOL dropFrames;
 
 + (AVAssetFrameDecoder*) aVAssetFrameDecoder;
 

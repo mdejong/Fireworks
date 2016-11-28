@@ -13,6 +13,14 @@
 
 #import "maxvid_file.h"
 
+#import "AVAssetConvertCommon.h"
+
+//#define LOGGING
+
+#if defined(HAS_LIB_COMPRESSION_API)
+#include "AVStreamEncodeDecode.h"
+#endif // HAS_LIB_COMPRESSION_API
+
 #if MV_ENABLE_DELTAS
 #include "maxvid_deltas.h"
 #endif // MV_ENABLE_DELTAS
@@ -47,7 +55,7 @@
 
 @property (nonatomic, retain) AVFrame *lastFrame;
 
-@property (nonatomic, assign) MVFrame *mvFrames;
+@property (nonatomic, assign) void *mvFrames;
 
 @end
 
@@ -73,6 +81,7 @@
 
   if (self->m_mvFrames) {
     free(self->m_mvFrames);
+    self->m_mvFrames = NULL;
   }
   
   self.filePath = nil;
@@ -266,6 +275,7 @@
   
   assert(sizeof(MVFileHeader) == 16*4);
   assert(sizeof(MVFrame) == 3*4);
+  assert(sizeof(MVV3Frame) == 6*4);
   
   int numRead = (int) fread(hPtr, sizeof(MVFileHeader), 1, fp);
   if (numRead != 1) {
@@ -311,7 +321,17 @@
     
     NSUInteger numFrames = hPtr->numFrames;
     NSAssert(numFrames > 1, @"numFrames");
-    int numBytes = (int) (sizeof(MVFrame) * numFrames);
+    
+    int isV3 = (maxvid_file_version(hPtr) == MV_FILE_VERSION_THREE);
+
+    int numBytes;
+    
+    if (isV3) {
+      numBytes = (int) (sizeof(MVV3Frame) * numFrames);
+    } else {
+      numBytes = (int) (sizeof(MVFrame) * numFrames);
+    }
+    
     self->m_mvFrames = malloc(numBytes);
     
     if (self->m_mvFrames == NULL) {
@@ -362,11 +382,7 @@
         
         BOOL worked;
         
-        NSRange range;
-        range.location = 0;
-        range.length = MV_PAGESIZE;
-        
-        SegmentedMappedData *seg0 = [self.mappedData subdataWithRange:range];
+        SegmentedMappedData *seg0 = [self.mappedData subdataWithOffset:0 len:MV_PAGESIZE];
         if (seg0) {
           worked = TRUE;
         } else {
@@ -532,6 +548,10 @@
     NSAssert(FALSE, @"%@: %d", @"can't advance past last frame", (int) newFrameIndex);
   }
   
+  // Check for V3 format, each frame would need to be read in a specific way
+  
+  int isV3 = (maxvid_file_version([self header]) == MV_FILE_VERSION_THREE);
+  
   BOOL changeFrameData = FALSE;
   const int newFrameIndexSigned = (int) newFrameIndex;
   
@@ -561,14 +581,35 @@
     
     for ( int i = frameIndex ; i < newFrameIndexSigned; i++) {
       int actualFrameIndex = i + 1;
-      MVFrame *frame = maxvid_file_frame(self->m_mvFrames, actualFrameIndex);
       
-      if (maxvid_frame_isnopframe(frame)) {
-        // This frame is a no-op, since it duplicates data from the previous frame.
-      } else {
-        if (maxvid_frame_iskeyframe(frame)) {
-          lastKeyframeIndex = i;
+      if (isV3) {
+        MVV3Frame *frame = maxvid_v3_file_frame(self->m_mvFrames, actualFrameIndex);
+        
+        if (maxvid_v3_frame_isnopframe(frame)) {
+          // This frame is a no-op, since it duplicates data from the previous frame.
+        } else {
+          if (maxvid_v3_frame_iskeyframe(frame)) {
+            lastKeyframeIndex = i;
+          }
         }
+        
+#ifdef LOGGING
+        NSLog(@"advance to frame %d : offset %llu : bufferSize %d : adler %08X", actualFrameIndex, maxvid_v3_frame_offset(frame), maxvid_v3_frame_length(frame), frame->adler);
+#endif // LOGGING
+      } else {
+        MVFrame *frame = maxvid_file_frame(self->m_mvFrames, actualFrameIndex);
+        
+        if (maxvid_frame_isnopframe(frame)) {
+          // This frame is a no-op, since it duplicates data from the previous frame.
+        } else {
+          if (maxvid_frame_iskeyframe(frame)) {
+            lastKeyframeIndex = i;
+          }
+        }
+       
+#ifdef LOGGING
+        NSLog(@"advance to frame %d : offset %u : bufferSize %d : adler %08X", actualFrameIndex, maxvid_frame_offset(frame), maxvid_frame_length(frame), frame->adler);
+#endif // LOGGING
       }
     }
     // Don't set frameIndex for the first frame (frameIndex == -1)
@@ -577,8 +618,13 @@
       
 #ifdef EXTRA_CHECKS
       int actualFrameIndex = frameIndex + 1;
-      MVFrame *frame = maxvid_file_frame(self->m_mvFrames, actualFrameIndex);
-      NSAssert(maxvid_frame_iskeyframe(frame) == 1, @"frame must be a keyframe");
+      if (isV3) {
+        MVV3Frame *frame = maxvid_v3_file_frame(self->m_mvFrames, actualFrameIndex);
+        NSAssert(maxvid_v3_frame_iskeyframe(frame) == 1, @"frame must be a keyframe");
+      } else {
+        MVFrame *frame = maxvid_file_frame(self->m_mvFrames, actualFrameIndex);
+        NSAssert(maxvid_frame_iskeyframe(frame) == 1, @"frame must be a keyframe");
+      }
 #endif // EXTRA_CHECKS      
     }
   }
@@ -589,22 +635,41 @@
   
   for ( ; inputMemoryMapped && (frameIndex < newFrameIndexSigned); frameIndex++) @autoreleasepool {
     int actualFrameIndex = frameIndex + 1;
-    MVFrame *frame = maxvid_file_frame(self->m_mvFrames, actualFrameIndex);
+    MVFrame *framePre3 = NULL;
+    MVV3Frame *frame = NULL;
 
+    if (isV3) {
+      frame = maxvid_v3_file_frame(self->m_mvFrames, actualFrameIndex);
+    } else {
+      framePre3 = maxvid_file_frame(self->m_mvFrames, actualFrameIndex);
+    }
+    
 #ifdef EXTRA_CHECKS
 # if MV_ENABLE_DELTAS
     if (isDeltas) {
-      NSAssert(maxvid_frame_iskeyframe(frame) == 0, @"frame must not be a keyframe in deltas mode");
+      if (isV3) {
+        NSAssert(maxvid_v3_frame_iskeyframe(frame) == 0, @"frame must not be a keyframe in deltas mode");
+      } else {
+        NSAssert(maxvid_frame_iskeyframe(framePre3) == 0, @"frame must not be a keyframe in deltas mode");
+      }
     }
 # endif // MV_ENABLE_DELTAS
     
     if (actualFrameIndex == 0) {
 # if MV_ENABLE_DELTAS
       if (isDeltas == FALSE) {
-        NSAssert(maxvid_frame_iskeyframe(frame) == 1, @"initial frame must be a keyframe");
+        if (isV3) {
+          NSAssert(maxvid_v3_frame_iskeyframe(frame) == 1, @"initial frame must be a keyframe");
+        } else {
+          NSAssert(maxvid_frame_iskeyframe(framePre3) == 1, @"initial frame must be a keyframe");
+        }
       }
 # else
-      NSAssert(maxvid_frame_iskeyframe(frame) == 1, @"initial frame must be a keyframe");
+      if (isV3) {
+        NSAssert(maxvid_v3_frame_iskeyframe(frame) == 1, @"initial frame must be a keyframe");
+      } else {
+        NSAssert(maxvid_frame_iskeyframe(framePre3) == 1, @"initial frame must be a keyframe");
+      }
 # endif // MV_ENABLE_DELTAS
     }
 #endif // EXTRA_CHECKS
@@ -617,8 +682,14 @@
       // that we have to explicitly mark the data as changed because we want a new frame
       // that is not marked as a duplicate of the previous frame to be returned.
       
-      if (maxvid_frame_isnopframe(frame)) {
-        changeFrameData = TRUE;
+      if (isV3) {
+        if (maxvid_v3_frame_isnopframe(frame)) {
+          changeFrameData = TRUE;
+        }
+      } else {
+        if (maxvid_frame_isnopframe(framePre3)) {
+          changeFrameData = TRUE;
+        }
       }
       
       AVFrame *frame = [AVFrame aVFrame];
@@ -649,13 +720,19 @@
     
 #endif // MV_ENABLE_DELTAS
     
-    if (maxvid_frame_isnopframe(frame)) {
+    if ((!isV3 && maxvid_frame_isnopframe(framePre3)) || (isV3 && maxvid_v3_frame_isnopframe(frame))) {
       // This frame is a no-op, since it duplicates data from the previous frame.
       //      fprintf(stdout, "Frame %d NOP\n", actualFrameIndex);
     } else {
       //      fprintf(stdout, "Frame %d [Size %d Offset %d Keyframe %d]\n", actualFrameIndex, frame->offset, movsample_length(frame), movsample_iskeyframe(frame));
       
-      int isDeltaFrame = !maxvid_frame_iskeyframe(frame);
+      int isDeltaFrame;
+      
+      if (isV3) {
+        isDeltaFrame = !maxvid_v3_frame_iskeyframe(frame);
+      } else {
+        isDeltaFrame = !maxvid_frame_iskeyframe(framePre3);
+      }
       
       if (self.currentFrameBuffer != nextFrameBuffer) {
         // Copy the previous frame buffer unless there was not one, or current is a keyframe
@@ -686,18 +763,53 @@
       }
 # endif // TARGET_OS_IPHONE
 #endif // EXTRA_CHECKS
+      
+      int isCompressedFrame = 0;
+      
+      // Calculate offset where frame starts and length of frame
+      off_t frameStartOffset;
+      uint32_t inputBuffer32NumBytes;
+      
+      if (isV3) {
+        // Starting from v3, the 64 bit sized offset is stored directly in the file
+        frameStartOffset = maxvid_v3_frame_offset(frame);
+        uint32_t numBytes = maxvid_v3_frame_length(frame);
+        
+        isCompressedFrame = maxvid_v3_frame_iscompressed(frame);
+        
+        if (isCompressedFrame) {
+#if defined(HAS_LIB_COMPRESSION_API)
+#else
+          assert(0);
+#endif // HAS_LIB_COMPRESSION_API
+        }
+        
+        if (!isCompressedFrame) {
+          off_t actualNumBytes = numBytes;
+          
+#if defined(DEBUG)
+          assert(actualNumBytes > 0);
+          assert(actualNumBytes < 0xFFFFFFFF);
+#endif // DEBUG
+          
+          inputBuffer32NumBytes = (uint32_t) actualNumBytes;
+        } else {
+          // A compressed frame can be decompressed with the knowledge that the
+          // framebuffer is large enough to store the output.
+          
+          inputBuffer32NumBytes = numBytes;
+        }
+      } else {
+        frameStartOffset = maxvid_frame_offset(framePre3);
+        inputBuffer32NumBytes = maxvid_frame_length(framePre3);
+      }
 
 #if defined(USE_SEGMENTED_MMAP)
       // Create a mapped segment using the frame offset and length for this frame.
 
       uint32_t *inputBuffer32 = NULL;
-      uint32_t inputBuffer32NumBytes = maxvid_frame_length(frame);
-      
-      NSRange range;
-      range.location = maxvid_frame_offset(frame);
-      range.length = inputBuffer32NumBytes;
-  
-      SegmentedMappedData *mappedSeg = [self.mappedData subdataWithRange:range];
+        
+      SegmentedMappedData *mappedSeg = [self.mappedData subdataWithOffset:frameStartOffset len:inputBuffer32NumBytes];
       
       if (mappedSeg == nil) {
         inputMemoryMapped = FALSE;
@@ -722,8 +834,7 @@
       
       NSData *mappedDataObj = mappedSeg;
 #else
-      uint32_t *inputBuffer32 = (uint32_t*) (mappedPtr + maxvid_frame_offset(frame));
-      uint32_t inputBuffer32NumBytes = maxvid_frame_length(frame);
+      uint32_t *inputBuffer32 = (uint32_t*) (mappedPtr + frameStartOffset);
       NSData *mappedDataObj = self.mappedData;
         
 #if defined(REGRESSION_TESTS)
@@ -812,6 +923,8 @@
         
         uint32_t numBytesToIncludeInAdler;
         
+        uint32_t adler;
+        
         if (maxvid_file_version(header) == MV_FILE_VERSION_ZERO) {
           // File rev 0 will calculate an adler checksum using (width * height * numBytesInPixel)
           // such that an odd sized buffer will not include the zero padding pixels. This logic
@@ -823,14 +936,65 @@
           } else {
             numBytesToIncludeInAdler = frameBufferSize * sizeof(uint32_t);
           }
-        } else {
+          adler = framePre3->adler;
+        } else if (maxvid_file_version(header) == MV_FILE_VERSION_ONE || maxvid_file_version(header) == MV_FILE_VERSION_TWO) {
           // File rev > 0, include any padding pixel in the delta frame calculation
           
           numBytesToIncludeInAdler = frameBufferNumBytes;
+          adler = framePre3->adler;
+        } else if (maxvid_file_version(header) == MV_FILE_VERSION_THREE) {
+          numBytesToIncludeInAdler = frameBufferNumBytes;
+          adler = frame->adler;
+        } else {
+          assert(0);
         }
 
-        [self assertSameAdler:frame->adler frameBuffer:frameBuffer frameBufferNumBytes:numBytesToIncludeInAdler];
+        [self assertSameAdler:adler frameBuffer:frameBuffer frameBufferNumBytes:numBytesToIncludeInAdler];
 #endif // EXTRA_CHECKS || ALWAYS_CHECK_ADLER
+        
+#if defined(HAS_LIB_COMPRESSION_API)
+      } else if (isCompressedFrame) {
+        // Input buffer is a compressed keyframe
+        
+        changeFrameData = TRUE;
+        
+        [nextFrameBuffer doneZeroCopyPixels];
+        
+        void *frameBuffer = (void*)nextFrameBuffer.pixels;
+#ifdef EXTRA_CHECKS
+        NSAssert(frameBuffer, @"frameBuffer");
+#endif // EXTRA_CHECKS
+        
+        [AVStreamEncodeDecode streamUnDeltaAndUncompress:mappedDataObj frameBuffer:frameBuffer frameBufferNumBytes:frameBufferNumBytes bpp:bpp algorithm:COMPRESSION_LZ4 expectedDecodedSize:(int)self.width*(int)self.height];
+        
+#if defined(EXTRA_CHECKS) || defined(ALWAYS_CHECK_ADLER)
+        {
+          int numBytesToIncludeInAdler;
+          
+          uint32_t adler;
+          
+          MVFileHeader *header = [self header];
+          
+          if (maxvid_file_version(header) < MV_FILE_VERSION_THREE) {
+            adler = framePre3->adler;
+          } else {
+            adler = frame->adler;
+          }
+          
+          if (bpp == 16) {
+            numBytesToIncludeInAdler = frameBufferSize * sizeof(uint16_t);
+          } else {
+            numBytesToIncludeInAdler = frameBufferSize * sizeof(uint32_t);
+          }
+          
+          // Calculate the keyframe checksum including the pixels and and zero padding pixels.
+          NSAssert(numBytesToIncludeInAdler == frameBufferNumBytes, @"frameBufferNumBytes");
+          
+          [self assertSameAdler:adler frameBuffer:frameBuffer frameBufferNumBytes:numBytesToIncludeInAdler];
+        }
+#endif // EXTRA_CHECKS
+
+#endif // HAS_LIB_COMPRESSION_API
       } else {
         // Input buffer contains a complete keyframe, use zero copy optimization
         
@@ -859,7 +1023,18 @@
 #if defined(EXTRA_CHECKS) || defined(ALWAYS_CHECK_ADLER)
         // Calculate the keyframe checksum including the pixels and and zero padding pixels.
         NSAssert(inputBuffer32NumBytes == frameBufferNumBytes, @"frameBufferNumBytes");
-        [self assertSameAdler:frame->adler frameBuffer:inputBuffer32 frameBufferNumBytes:inputBuffer32NumBytes];
+        
+        uint32_t adler;
+        
+        MVFileHeader *header = [self header];
+        
+        if (maxvid_file_version(header) < MV_FILE_VERSION_THREE) {
+          adler = framePre3->adler;
+        } else {
+          adler = frame->adler;
+        }
+        
+        [self assertSameAdler:adler frameBuffer:inputBuffer32 frameBufferNumBytes:inputBuffer32NumBytes];
 #endif // EXTRA_CHECKS
   
         [nextFrameBuffer zeroCopyPixels:inputBuffer32 mappedData:mappedDataObj];

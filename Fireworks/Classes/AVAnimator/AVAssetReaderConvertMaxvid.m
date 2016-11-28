@@ -17,6 +17,8 @@
 
 #import "CGFrameBuffer.h"
 
+#include "AVStreamEncodeDecode.h"
+
 #if __has_feature(objc_arc)
 #else
 #import "AutoPropertyRelease.h"
@@ -32,6 +34,8 @@ NSString * const AVAssetReaderConvertMaxvidCompletedNotification = @"AVAssetRead
 
 @property (nonatomic, retain) AVAssetFrameDecoder *frameDecoder;
 
+@property (nonatomic, retain) CGFrameBuffer *resizeFramebuffer;
+
 @end
 
 @implementation AVAssetReaderConvertMaxvid
@@ -39,6 +43,10 @@ NSString * const AVAssetReaderConvertMaxvidCompletedNotification = @"AVAssetRead
 @synthesize assetURL = m_assetURL;
 @synthesize frameDecoder = m_frameDecoder;
 @synthesize wasSuccessful = m_wasSuccessful;
+
+#if defined(HAS_LIB_COMPRESSION_API)
+@synthesize compressed = m_compressed;
+#endif // HAS_LIB_COMPRESSION_API
 
 - (void) dealloc
 {
@@ -52,6 +60,7 @@ NSString * const AVAssetReaderConvertMaxvidCompletedNotification = @"AVAssetRead
 + (AVAssetReaderConvertMaxvid*) aVAssetReaderConvertMaxvid
 {
   AVAssetReaderConvertMaxvid *obj = [[AVAssetReaderConvertMaxvid alloc] init];
+  obj.genV3 = TRUE; // enable extended file size out to 64bit offsets
 #if __has_feature(objc_arc)
   return obj;
 #else
@@ -88,26 +97,107 @@ NSString * const AVAssetReaderConvertMaxvidCompletedNotification = @"AVAssetRead
 
 // Emit frame of data
 
-- (BOOL) blockingDecodeEmitFrame:(CGFrameBuffer*)frameBuffer
+- (BOOL) blockingDecodeEmitFrame:(AVFrame*)avFrame
 {
   BOOL worked;
 
+  CGFrameBuffer *frameBuffer = avFrame.cgFrameBuffer;
   NSAssert(frameBuffer, @"frameBuffer");
   
-  // Calculate how many bytes make up the image via (bytesPerRow * height). The
-  // numBytes value may be padded out to fit to an OS page bound. If the buffer
-  // is padded in the case of an odd number of pixels, pass the buffer size
-  // including the padding pixels.
+  NSAssert(frameBuffer.isLockedByDataProvider, @"isLockedByDataProvider");
   
-  int bufferSize  = (int) frameBuffer.numBytes;
-  void *pixelsPtr = frameBuffer.pixels;
+  int bufferSize;
+  void *pixelsPtr;
   
-  // write entire buffer of raw 32bit pixels to the file.
-  // bitmap info is native (kCGImageAlphaNoneSkipFirst|kCGBitmapByteOrder32Little)
+  // If the frame width and height do not match the expected
+  // output width and height then the frame data must be resized
+  // before it can be written as pixels.
   
-  worked = [self writeKeyframe:pixelsPtr bufferSize:bufferSize];
+  int width = (int) self.movieSize.width;
+  int height = (int) self.movieSize.height;
   
-  return worked;
+  BOOL sameWidth = (width == frameBuffer.width);
+  BOOL sameHeight = (height == frameBuffer.height);
+  
+  if (!sameWidth || !sameHeight) {
+    CGFrameBuffer *resizeFramebuffer = self.resizeFramebuffer;
+    
+    if (resizeFramebuffer == nil) {
+      resizeFramebuffer = [CGFrameBuffer cGFrameBufferWithBppDimensions:frameBuffer.bitsPerPixel width:self.movieSize.width height:self.movieSize.height];
+      
+      NSAssert(resizeFramebuffer, @"resizeFramebuffer with dimensions %d x %d", (int)self.movieSize.width, (int)self.movieSize.height);
+      
+      self.resizeFramebuffer = resizeFramebuffer;
+    }
+    
+    CGImageRef cgImage = avFrame.image.CGImage;
+      
+    [resizeFramebuffer renderCGImage:cgImage];
+    
+    // Calculate how many bytes make up the image via (bytesPerRow * height). The
+    // numBytes value may be padded out to fit to an OS page bound. If the buffer
+    // is padded in the case of an odd number of pixels, pass the buffer size
+    // including the padding pixels.
+    
+    bufferSize  = (int) resizeFramebuffer.numBytes;
+    pixelsPtr = resizeFramebuffer.pixels;
+  } else {
+    
+    // Calculate how many bytes make up the image via (bytesPerRow * height). The
+    // numBytes value may be padded out to fit to an OS page bound. If the buffer
+    // is padded in the case of an odd number of pixels, pass the buffer size
+    // including the padding pixels.
+    
+    bufferSize  = (int) frameBuffer.numBytes;
+    pixelsPtr = frameBuffer.pixels;
+  }
+  
+#if defined(HAS_LIB_COMPRESSION_API)
+  // If compression is used, then generate a compressed buffer and write it as
+  // a keyframe.
+  
+  if (self.compressed) {
+    NSData *pixelData = [NSData dataWithBytesNoCopy:pixelsPtr length:bufferSize freeWhenDone:NO];
+    
+    // FIXME: make this mutable data a member so that it is not allocated
+    // in every loop.
+    
+    NSMutableData *mEncodedData = [NSMutableData data];
+    
+    [AVStreamEncodeDecode streamDeltaAndCompress:pixelData
+                                     encodedData:mEncodedData
+                                             bpp:self.bpp
+                                       algorithm:COMPRESSION_LZ4];
+    
+    //int src_size = bufferSize;
+    assert(mEncodedData.length < 0xFFFFFFFF);
+    int dst_size = (int) mEncodedData.length;
+    
+    //printf("compressed frame size %d kB down to %d kB\n", (int)src_size/1000, (int)dst_size/1000);
+    
+    // Calculate adler based on original pixels (not the compressed representation)
+    
+    uint32_t adler = 0;
+    
+    if (self.genAdler) {
+      adler = maxvid_adler32(0, (unsigned char*)pixelsPtr, bufferSize);
+    }
+    
+    worked = [self writeKeyframe:(char*)mEncodedData.bytes bufferSize:(int)dst_size adler:adler isCompressed:TRUE];
+  } else
+#endif // HAS_LIB_COMPRESSION_API
+  {
+    // write entire buffer of raw 32bit pixels to the file.
+    // bitmap info is native (kCGImageAlphaNoneSkipFirst|kCGBitmapByteOrder32Little)
+    
+    worked = [self writeKeyframe:pixelsPtr bufferSize:bufferSize];
+  }
+  
+  if (worked) {
+    return TRUE;
+  } else {
+    return FALSE;
+  }
 }
 
 // Read video data from a single track (only one video track is supported anyway)
@@ -132,7 +222,11 @@ NSString * const AVAssetReaderConvertMaxvidCompletedNotification = @"AVAssetRead
   
   self.totalNumFrames = (int) frameDecoder.numFrames;
   self.frameDuration = frameDecoder.frameDuration;
-  self.movieSize = CGSizeMake(frameDecoder.width, frameDecoder.height);
+  
+  if (CGSizeEqualToSize(CGSizeZero, self.movieSize)) {
+    self.movieSize = CGSizeMake(frameDecoder.width, frameDecoder.height);
+  }
+
   self.bpp = 24;
       
   worked = [self open];
@@ -152,7 +246,7 @@ NSString * const AVAssetReaderConvertMaxvidCompletedNotification = @"AVAssetRead
     if (frame.isDuplicate) {
       [self writeNopFrame];
     } else {
-      worked = [self blockingDecodeEmitFrame:frame.cgFrameBuffer];
+      worked = [self blockingDecodeEmitFrame:frame];
       
       if (worked == FALSE) {
         writeFailed = TRUE;
@@ -178,6 +272,9 @@ NSString * const AVAssetReaderConvertMaxvidCompletedNotification = @"AVAssetRead
   retstatus = TRUE;
   
 retcode:
+  // Release resize framebuffer in case it is very large
+  
+  self.resizeFramebuffer = nil;
   
   // Explicitly release the frame decoder in case this frees up memory sooner.
   // An asset frame decoder can only be used once anyway

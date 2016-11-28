@@ -18,56 +18,6 @@
 #define ALWAYS_GENERATE_ADLER
 #endif // EXTRA_CHECKS
 
-// Emit zero length words up to the next page bound when emitting a keyframe.
-// Pass in the current offset, function returns the new offset. This method
-// will emit zero words of padding if exactly on the page bound already.
-
-static inline
-uint32_t maxvid_file_padding_before_keyframe(FILE *outFile, uint32_t offset) {
-  assert((offset % 4) == 0);
-  
-  const uint32_t boundSize = MV_PAGESIZE;
-  uint32_t bytesToBound = UINTMOD(offset, boundSize);
-  assert(bytesToBound >= 0 && bytesToBound <= boundSize);
-  
-  bytesToBound = boundSize - bytesToBound;
-  uint32_t wordsToBound = bytesToBound >> 2;
-  wordsToBound &= ((MV_PAGESIZE >> 2) - 1);
-  
-  if (wordsToBound > 0) {
-    assert(bytesToBound == (wordsToBound * 4));
-    assert(wordsToBound < (boundSize / 4));
-  }
-  
-  uint32_t zero = 0;
-  while (wordsToBound != 0) {
-    size_t size = fwrite(&zero, sizeof(zero), 1, outFile);
-    assert(size == 1);
-    wordsToBound--;
-  }
-  
-  off_t offsetAfterOff = ftello(outFile);
-  assert(offsetAfterOff != -1);
-  assert(offset < 0xFFFFFFFF);
-  // Note that in the case where offsetAfterOff is larger
-  // than the max 32 bit value, this will clamp to 32 bits
-  // and then only examine the low bits anyway.
-  uint32_t offsetAfter = (uint32_t)offsetAfterOff;
-  
-  assert(UINTMOD(offsetAfter, boundSize) == 0);
-  
-  return offsetAfter;
-}
-
-// Emit zero length words up to the next page bound after the keyframe data.
-// Pass in the current offset, function returns the new offset.
-// This method will emit zero words of padding if exactly on the page bound already.
-
-static inline
-uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
-  return maxvid_file_padding_before_keyframe(outFile, offset);
-}
-
 @interface AVMvidFileWriter ()
 
 - (void) saveOffset;
@@ -88,10 +38,81 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
 @synthesize genAdler = m_genAdler;
 @synthesize movieSize = m_movieSize;
 @synthesize isAllKeyframes = m_isAllKeyframes;
+@synthesize genV3 = m_genV3;
 
 #if MV_ENABLE_DELTAS
 @synthesize isDeltas = m_isDeltas;
 #endif // MV_ENABLE_DELTAS
+
+// Emit zero length words up to the next page bound after the keyframe data.
+// Pass in the current offset, function returns the new offset.
+// This method will emit zero words of padding if exactly on the page bound already.
+
+- (off_t) paddingAfterKeyframe:(FILE*)outFile offset:(off_t)_offset
+{
+#if defined(DEBUG)
+  if (self.genV3) {
+    // Nop
+  } else {
+    assert((_offset % 4) == 0);
+  }
+#endif // DEBUG
+  
+  const uint32_t boundSize = MV_PAGESIZE;
+  uint32_t bytesToBound = UINTMOD((uint32_t)_offset, boundSize);
+  assert(bytesToBound >= 0 && bytesToBound <= boundSize);
+  
+  bytesToBound = boundSize - bytesToBound;
+  
+  if (self.genV3) {
+    uint32_t nBytesToWordBound = bytesToBound % sizeof(uint32_t);
+    uint8_t zeroByte = 0;
+    while (nBytesToWordBound != 0) {
+      size_t size = fwrite(&zeroByte, sizeof(zeroByte), 1, outFile);
+      assert(size == 1);
+      nBytesToWordBound--;
+      bytesToBound--;
+    }
+  }
+  
+  uint32_t wordsToBound = bytesToBound >> 2;
+  wordsToBound &= ((MV_PAGESIZE >> 2) - 1);
+  
+#if defined(DEBUG)
+  if (wordsToBound > 0) {
+    assert(bytesToBound == (wordsToBound * 4));
+    assert(wordsToBound < (boundSize / 4));
+  }
+#endif // DEBUG
+  
+  // write aligned words
+  
+  uint32_t zero = 0;
+  while (wordsToBound != 0) {
+    size_t size = fwrite(&zero, sizeof(zero), 1, outFile);
+    assert(size == 1);
+    wordsToBound--;
+  }
+  
+  off_t offsetAfterOff = ftello(outFile);
+  assert(offsetAfterOff != -1);
+  
+  if (self.genV3) {
+    // Nop
+  } else {
+    assert(offset < 0xFFFFFFFF);
+  }
+  
+  // Note that in the case where offsetAfterOff is larger
+  // than the max 32 bit value, this will clamp to 32 bits
+  // and then only examine the low bits anyway.
+  
+#if defined(DEBUG)
+  assert(UINTMOD((uint32_t)offsetAfterOff, boundSize) == 0);
+#endif // DEBUG
+  
+  return offsetAfterOff;
+}
 
 - (void) close
 {
@@ -179,14 +200,18 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
   
   int numOutputFrames = self.totalNumFrames;
   
-  framesArrayNumBytes = sizeof(MVFrame) * numOutputFrames;
-  mvFramesArray = malloc(framesArrayNumBytes);
+  if (self.genV3) {
+    framesArrayNumBytes = sizeof(MVV3Frame) * numOutputFrames;
+  } else {
+    framesArrayNumBytes = sizeof(MVFrame) * numOutputFrames;
+  }
+  int numBytes = framesArrayNumBytes;
+  mvFramesArray = malloc(numBytes);
   if (mvFramesArray == NULL) {
     return FALSE;
   }
-  memset(mvFramesArray, 0, framesArrayNumBytes);
-  
-  numWritten = (int) fwrite(mvFramesArray, framesArrayNumBytes, 1, maxvidOutFile);
+  memset(mvFramesArray, 0, numBytes);
+  numWritten = (int) fwrite(mvFramesArray, numBytes, 1, maxvidOutFile);
   if (numWritten != 1) {
     return FALSE;
   }
@@ -214,17 +239,31 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
   NSAssert(frameNum != 0, @"nop frame can't be first frame");
   NSAssert(frameNum < self.totalNumFrames, @"totalNumFrames");
   
-  MVFrame *mvFrame = &mvFramesArray[frameNum];
-  MVFrame *prevMvFrame = &mvFramesArray[frameNum-1];
-  
-  maxvid_frame_setoffset(mvFrame, maxvid_frame_offset(prevMvFrame));
-  maxvid_frame_setlength(mvFrame, maxvid_frame_length(prevMvFrame));
-  
-  if (maxvid_frame_iskeyframe(prevMvFrame)) {
-    maxvid_frame_setkeyframe(mvFrame);
+  if (self.genV3) {
+    MVV3Frame *mvFrame = &(((MVV3Frame*)mvFramesArray)[frameNum]);
+    MVV3Frame *prevMvFrame = &(((MVV3Frame*)mvFramesArray)[frameNum-1]);
+    
+    maxvid_v3_frame_setoffset(mvFrame, maxvid_v3_frame_offset(prevMvFrame));
+    maxvid_v3_frame_setlength(mvFrame, maxvid_v3_frame_length(prevMvFrame));
+    
+    if (maxvid_v3_frame_iskeyframe(prevMvFrame)) {
+      maxvid_v3_frame_setkeyframe(mvFrame);
+    }
+    
+    maxvid_v3_frame_setnopframe(mvFrame);
+  } else {
+    MVFrame *mvFrame = &(((MVFrame*)mvFramesArray)[frameNum]);
+    MVFrame *prevMvFrame = &(((MVFrame*)mvFramesArray)[frameNum-1]);
+    
+    maxvid_frame_setoffset(mvFrame, maxvid_frame_offset(prevMvFrame));
+    maxvid_frame_setlength(mvFrame, maxvid_frame_length(prevMvFrame));
+    
+    if (maxvid_frame_iskeyframe(prevMvFrame)) {
+      maxvid_frame_setkeyframe(mvFrame);
+    }
+    
+    maxvid_frame_setnopframe(mvFrame);
   }
-  
-  maxvid_frame_setnopframe(mvFrame);
   
   // Note that an adler is not generated for a no-op frame
   
@@ -247,22 +286,41 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
   NSAssert(frameNum == 0, @"initial nop frame must be first frame");
   NSAssert(frameNum < self.totalNumFrames, @"totalNumFrames");
   
-  MVFrame *mvFrame = &mvFramesArray[frameNum];
-  
-  maxvid_frame_setoffset(mvFrame, 0);
-  maxvid_frame_setlength(mvFrame, 0);
-
-  // This special case initial nop frame is only emitted with the
-  // all deltas type of mvid file, this type of file contains no
-  // keyframes, only deltas frames.
-  
-  maxvid_frame_setnopframe(mvFrame);
-  
-  // Normally, an adler is not generated for a nop frame. But
-  // this nop frame is actually like a keyframe with all black
-  // pixels. So, set the adler to all bits on.
-  
-  mvFrame->adler = 0xFFFFFFFF;
+  if (self.genV3) {
+    MVV3Frame *mvFrame = &(((MVV3Frame*)mvFramesArray)[frameNum]);
+    
+    maxvid_v3_frame_setoffset(mvFrame, 0);
+    maxvid_v3_frame_setlength(mvFrame, 0);
+    
+    // This special case initial nop frame is only emitted with the
+    // all deltas type of mvid file, this type of file contains no
+    // keyframes, only deltas frames.
+    
+    maxvid_v3_frame_setnopframe(mvFrame);
+    
+    // Normally, an adler is not generated for a nop frame. But
+    // this nop frame is actually like a keyframe with all black
+    // pixels. So, set the adler to all bits on.
+    
+    mvFrame->adler = 0xFFFFFFFF;
+  } else {
+    MVFrame *mvFrame = &(((MVFrame*)mvFramesArray)[frameNum]);
+    
+    maxvid_frame_setoffset(mvFrame, 0);
+    maxvid_frame_setlength(mvFrame, 0);
+    
+    // This special case initial nop frame is only emitted with the
+    // all deltas type of mvid file, this type of file contains no
+    // keyframes, only deltas frames.
+    
+    maxvid_frame_setnopframe(mvFrame);
+    
+    // Normally, an adler is not generated for a nop frame. But
+    // this nop frame is actually like a keyframe with all black
+    // pixels. So, set the adler to all bits on.
+    
+    mvFrame->adler = 0xFFFFFFFF;
+  }
   
   frameNum++;
 }
@@ -298,7 +356,18 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
 {
   offset = ftello(maxvidOutFile);
   NSAssert(offset != -1, @"ftello returned -1");
-  NSAssert(offset < 0xFFFFFFFF, @"ftello offset must fit into 32 bits, got %qd", offset);
+  
+  if (self.genV3) {
+    // Nop
+  } else {
+    NSAssert(offset < 0xFFFFFFFF, @"ftello offset must fit into 32 bits, got %qd", offset);
+  }
+  
+#ifdef LOGGING
+  NSLog(@"saveOffset : offset %llu", offset);
+#endif // LOGGING
+  
+  return;
 }
 
 // Advance the file offset to the start of the next page in memory.
@@ -307,21 +376,51 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
 
 - (void) skipToNextPageBound
 {
-  offset = maxvid_file_padding_before_keyframe(maxvidOutFile, (uint32_t)offset);
+  offset = [self paddingAfterKeyframe:maxvidOutFile offset:offset];
  
   NSAssert(frameNum < self.totalNumFrames, @"totalNumFrames");
   
-  MVFrame *mvFrame = &mvFramesArray[frameNum];
+  if (self.genV3) {
+    // Write the total number of whole memory pages. Note that
+    // in the case of writing uncompressed pixels the decoder
+    // will be able to figure out the exact actual width
+    // by calculating the number of bytes in the frame.
+    
+    uint32_t numPages = (uint32_t) (offset / MV_PAGESIZE);
+    
+    if ((offset % MV_PAGESIZE) != 0) {
+      numPages++;
+    }
+    
+#ifdef LOGGING
+    NSLog(@"skipToNextPageBound %d : next page offset %llu bytes or %d pages", frameNum, offset, numPages);
+#endif // LOGGING
+    
+    MVV3Frame *mvFrame = &(((MVV3Frame*)mvFramesArray)[frameNum]);
+    
+    uint64_t fileOffset = (uint64_t)numPages * (uint64_t)MV_PAGESIZE;
+    
+    maxvid_v3_frame_setoffset(mvFrame, fileOffset);
+    maxvid_v3_frame_setkeyframe(mvFrame);
+  } else {
+    // Without the V3 flag file offsets are limited to 32 bits
   
-  maxvid_frame_setoffset(mvFrame, (uint32_t)offset);
-  
-  maxvid_frame_setkeyframe(mvFrame);
+    MVFrame *mvFrame = &(((MVFrame*)mvFramesArray)[frameNum]);
+    
+    maxvid_frame_setoffset(mvFrame, (uint32_t)offset);
+    maxvid_frame_setkeyframe(mvFrame);
+  }
 }
 
 - (BOOL) writeKeyframe:(char*)ptr bufferSize:(int)bufferSize
 {
+  return [self writeKeyframe:ptr bufferSize:bufferSize adler:0 isCompressed:FALSE];
+}
+
+- (BOOL) writeKeyframe:(char*)ptr bufferSize:(int)bufferSize adler:(uint32_t)adler isCompressed:(BOOL)isCompressed
+{
 #ifdef LOGGING
-  NSLog(@"writeKeyframe %d : bufferSize %d", frameNum, bufferSize);
+  NSLog(@"writeKeyframe %d : bufferSize %d : adler %08X", frameNum, bufferSize, adler);
 #endif // LOGGING
   
   [self skipToNextPageBound];
@@ -337,24 +436,60 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
         
     NSAssert(frameNum < self.totalNumFrames, @"totalNumFrames");
     
-    MVFrame *mvFrame = &mvFramesArray[frameNum];
+    NSAssert(length == bufferSize, @"length");
     
-    maxvid_frame_setlength(mvFrame, length);
+#ifdef LOGGING
+    NSLog(@"writeKeyframe %d : bufferSize %d will be written as %d num bytes", frameNum, bufferSize, bufferSize);
+#endif // LOGGING
+    
+    if (self.genV3) {
+      MVV3Frame *mvFrame = &(((MVV3Frame*)mvFramesArray)[frameNum]);
+      maxvid_v3_frame_setlength(mvFrame, length);
+      
+      if (isCompressed) {
+        maxvid_v3_frame_setcompressed(mvFrame);
+      }
+    } else {
+      MVFrame *mvFrame = &(((MVFrame*)mvFramesArray)[frameNum]);
+      maxvid_frame_setlength(mvFrame, length);
+    }
     
     // Generate adler32 for pixel data and save into frame data
     
+    uint32_t calcAdler;
+    
     if (self.genAdler) {
-      mvFrame->adler = maxvid_adler32(0, (unsigned char*)ptr, bufferSize);
-      assert(mvFrame->adler != 0);
+      if (adler == 0) {
+        calcAdler = maxvid_adler32(0, (unsigned char*)ptr, bufferSize);
+      } else {
+        calcAdler = adler;
+      }
+      assert(calcAdler != 0);
+      
+      // Set adler in frame
+      
+      if (self.genV3) {
+        MVV3Frame *mvFrame = &(((MVV3Frame*)mvFramesArray)[frameNum]);
+        mvFrame->adler = calcAdler;
+      } else {
+        MVFrame *mvFrame = &(((MVFrame*)mvFramesArray)[frameNum]);
+        mvFrame->adler = calcAdler;
+      }
     }
     
     // zero pad to next page bound
     
-    offset = maxvid_file_padding_after_keyframe(maxvidOutFile, (uint32_t)offset);
+    offset = [self paddingAfterKeyframe:maxvidOutFile offset:offset];
     assert(offset > 0); // silence compiler/analyzer warning
     
 #ifdef LOGGING
-    NSLog(@"frame[%d] : offset %u : length %u : adler %u", frameNum, mvFrame->offset, maxvid_frame_length(mvFrame),  mvFrame->adler);
+    if (self.genV3) {
+      MVV3Frame *mvFrame = &(((MVV3Frame*)mvFramesArray)[frameNum]);
+      NSLog(@"frame[%d] : offset %llu : length %u : adler %u", frameNum, maxvid_v3_frame_offset(mvFrame), maxvid_v3_frame_length(mvFrame),  mvFrame->adler);
+    } else {
+      MVFrame *mvFrame = &(((MVFrame*)mvFramesArray)[frameNum]);
+      NSLog(@"frame[%d] : offset %u : length %u : adler %u", frameNum, maxvid_frame_offset(mvFrame), maxvid_frame_length(mvFrame),  mvFrame->adler);
+    }
 #endif // LOGGING
     
     frameNum++;
@@ -384,7 +519,11 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
   
   // This file writer always emits a file with version set to 2
   
-  maxvid_file_set_version(mvHeader, MV_FILE_VERSION_TWO);
+  if (self.genV3) {
+    maxvid_file_set_version(mvHeader, MV_FILE_VERSION_THREE);
+  } else {
+    maxvid_file_set_version(mvHeader, MV_FILE_VERSION_TWO);
+  }
   
   // If all frames written were keyframes (or nop frames)
   // then set a flag to indicate this special case.
@@ -436,7 +575,7 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
 #ifdef LOGGING
   NSLog(@"writeDeltaframe %d : bufferSize %d", frameNum, bufferSize);
 #endif // LOGGING
-
+    
   self.isAllKeyframes = FALSE;
   
   [self saveOffset];
@@ -450,26 +589,40 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
 
     NSAssert(frameNum < self.totalNumFrames, @"totalNumFrames");
     
-    MVFrame *mvFrame = &mvFramesArray[frameNum];
-    
-    // FIXME: currently, the file offset is limited to the max size of a 32 bit unsigned
-    // integer. This limits the total file size to abount 4 gigs, but that could be a
-    // problem for really large files with high FPS. But, fixing this by adjusting the
-    // offset to 64 bits would break backwards compat on the file offset in the frames
-    // structure.
-    
-    // Note that offset must be saved before validateFileOffset is invoked
-    
-    maxvid_frame_setoffset(mvFrame, (uint32_t)offset);
-    
-    uint32_t length = [self validateFileOffset:FALSE];
-    
-    maxvid_frame_setlength(mvFrame, length);
-    
-    mvFrame->adler = adler;
+    if (self.genV3) {
+      MVV3Frame *mvFrame = &(((MVV3Frame*)mvFramesArray)[frameNum]);
+      
+      // Note that offset must be saved before validateFileOffset is invoked
+      
+      maxvid_v3_frame_setoffset(mvFrame, offset);
+      
+      uint32_t length = [self validateFileOffset:FALSE];
+      
+      maxvid_v3_frame_setlength(mvFrame, length);
+      
+      mvFrame->adler = adler;
+    } else {
+      MVFrame *mvFrame = &(((MVFrame*)mvFramesArray)[frameNum]);
+      
+      // Note that offset must be saved before validateFileOffset is invoked
+      
+      maxvid_frame_setoffset(mvFrame, (uint32_t)offset);
+      
+      uint32_t length = [self validateFileOffset:FALSE];
+      
+      maxvid_frame_setlength(mvFrame, length);
+      
+      mvFrame->adler = adler;
+    }
     
 #ifdef LOGGING
-    NSLog(@"frame[%d] : offset %u : length %u : adler %u", frameNum, mvFrame->offset, maxvid_frame_length(mvFrame),  mvFrame->adler);
+    if (self.genV3) {
+      MVV3Frame *mvFrame = &(((MVV3Frame*)mvFramesArray)[frameNum]);
+      NSLog(@"frame[%d] : offset %llu : length %u : adler %u", frameNum, maxvid_v3_frame_offset(mvFrame), maxvid_v3_frame_length(mvFrame),  mvFrame->adler);
+    } else {
+      MVFrame *mvFrame = &(((MVFrame*)mvFramesArray)[frameNum]);
+      NSLog(@"frame[%d] : offset %u : length %u : adler %u", frameNum, maxvid_frame_offset(mvFrame), maxvid_frame_length(mvFrame),  mvFrame->adler);
+    }
 #endif // LOGGING
     
     frameNum++;
@@ -478,16 +631,31 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
   }
 }
 
+// Check the previous and current file offset and return the length
+// of the frame data. Note that the difference between two frame offsets
+// will always fit into a 32 bit integer.
+
 - (uint32_t) validateFileOffset:(BOOL)isKeyFrame
 {
   off_t offsetBefore = self->offset;
   offset = ftello(maxvidOutFile);
   NSAssert(offset != -1, @"ftello returned -1");
-  NSAssert(offset < 0xFFFFFFFF, @"ftello offset must fit into 32 bits, got %qd", offset);
+  
+  if (self.genV3) {
+    // nop
+  } else {
+    NSAssert(offset < 0xFFFFFFFF, @"ftello offset must fit into 32 bits, got %qd", offset);
+  }
   off_t lengthOff = offset - offsetBefore;
   assert(lengthOff < 0xFFFFFFFF);
   uint32_t length = (uint32_t) lengthOff;
-  NSAssert(length > 0, @"length must be larger than");
+  NSAssert(length > 0, @"length must be larger than zero");
+  NSAssert((uint64_t)length == lengthOff, @"length must fit into 32 bits");
+  
+  if (self.genV3) {
+    // Allow byte or half byte segment length with v3
+    return length;
+  }
   
   // Typically, the framebuffer is an even number of pixels.
   // There is an odd case though, when emitting 16 bit pixels
