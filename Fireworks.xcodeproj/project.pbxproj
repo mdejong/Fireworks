@@ -730,6 +730,8 @@
 				TargetAttributes = {
 					3C4CF8CD1BC0B7D100B8BEB3 = {
 						CreatedOnToolsVersion = 7.0;
+						DevelopmentTeam = 9F74CLHA49;
+						ProvisioningStyle = Automatic;
 					};
 					3C4CF8E61BC0B7D100B8BEB3 = {
 						CreatedOnToolsVersion = 7.0;
@@ -1131,6 +1133,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = 9F74CLHA49;
 				INFOPLIST_FILE = Fireworks/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = comp.helpurock.Fireworks;
@@ -1142,6 +1146,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = 9F74CLHA49;
 				INFOPLIST_FILE = Fireworks/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = comp.helpurock.Fireworks;
